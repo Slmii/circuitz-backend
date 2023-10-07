@@ -1,0 +1,4 @@
+[workspace]
+members = [
+    "src/circuitz_back_end_backend",
+]

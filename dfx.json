@@ -1,0 +1,30 @@
+{
+  "canisters": {
+    "circuitz_back_end_backend": {
+      "candid": "src/circuitz_back_end_backend/circuitz_back_end_backend.did",
+      "package": "circuitz_back_end_backend",
+      "type": "rust"
+    },
+    "circuitz_back_end_frontend": {
+      "dependencies": [
+        "circuitz_back_end_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/circuitz_back_end_frontend/src/index.html"
+      },
+      "source": [
+        "src/circuitz_back_end_frontend/assets",
+        "dist/circuitz_back_end_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
