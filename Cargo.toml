@@ -1,4 +1,6 @@
 [workspace]
 members = [
-    "src/circuitz_back_end_backend",
+    "src/controllers/circuits",
+    "src/controllers/nodes",
+    "src/lib"
 ]
