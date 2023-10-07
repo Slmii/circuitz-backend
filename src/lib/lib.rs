@@ -5,6 +5,4 @@ pub mod types {
 	pub mod user;
 }
 
-pub mod save_candid;
 pub mod utils;
-pub mod canister;

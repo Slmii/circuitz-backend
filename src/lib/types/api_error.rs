@@ -1,6 +1,6 @@
 use candid::Deserialize;
 use ic_cdk::api::call::RejectionCode;
-use ic_kit::candid::CandidType;
+use candid::CandidType;
 
 #[derive(CandidType, Clone, Deserialize)]
 pub enum ApiError {

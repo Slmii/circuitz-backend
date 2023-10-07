@@ -12,6 +12,7 @@
 
 # generated files
 src/declarations/
+candid
 
 # rust
 target/
