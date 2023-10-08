@@ -1,7 +1,7 @@
-use ic_cdk::{ storage, caller };
+use crate::users_store::{ UsersStore, STATE };
+use ic_cdk::{ caller, storage };
 use ic_cdk_macros::{ post_upgrade, query, update, pre_upgrade };
-use lib::{ types::{ circuit::{ Circuit, PostCircuit }, api_error::ApiError }, utils::validate_anonymous };
-use crate::circuits_store::{ STATE, CircuitsStore };
+use lib::{ types::{ api_error::ApiError, user::User }, utils::validate_anonymous };
 
 #[pre_upgrade]
 fn pre_upgrade() {
@@ -10,24 +10,24 @@ fn pre_upgrade() {
 
 #[post_upgrade]
 fn post_upgrade() {
-	let (old_state,): (CircuitsStore,) = storage::stable_restore().unwrap();
+	let (old_state,): (UsersStore,) = storage::stable_restore().unwrap();
 	STATE.with(|state| {
 		*state.borrow_mut() = old_state;
 	});
 }
 
 #[query]
-fn get_user_circuits() -> Result<Vec<Circuit>, ApiError> {
+fn get_user() -> Result<User, ApiError> {
 	match validate_anonymous(&caller()) {
-		Ok(caller_principal) => Ok(CircuitsStore::get_user_circuits(caller_principal)),
+		Ok(caller_principal) => UsersStore::get_user(caller_principal),
 		Err(err) => Err(err),
 	}
 }
 
 #[update]
-fn add_circuit(post_circuit: PostCircuit) -> Result<Circuit, ApiError> {
+async fn create_user(username: Option<String>) -> Result<User, ApiError> {
 	match validate_anonymous(&caller()) {
-		Ok(caller_principal) => Ok(CircuitsStore::add_circuit(post_circuit, caller_principal)),
+		Ok(caller_principal) => UsersStore::create_user(caller_principal, username).await,
 		Err(err) => Err(err),
 	}
 }

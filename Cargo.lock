@@ -1602,6 +1602,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 
 [[package]]
+name = "users"
+version = "0.1.0"
+dependencies = [
+ "candid 0.9.9",
+ "ic-cdk 0.11.0",
+ "ic-cdk-macros",
+ "ic-kit",
+ "lib",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "value-bag"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

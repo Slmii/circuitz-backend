@@ -1,5 +1,5 @@
 use ic_cdk::{ storage, caller };
-use ic_cdk_macros::{ post_upgrade, query, pre_upgrade, export_candid };
+use ic_cdk_macros::{ post_upgrade, query, pre_upgrade };
 use lib::{ types::{ node::Node, api_error::ApiError }, utils::validate_anonymous };
 use crate::nodes_store::{ STATE, NodesStore };
 
@@ -24,4 +24,11 @@ fn get_circuit_nodes(circuit_id: u32) -> Result<Vec<Node>, ApiError> {
 	}
 }
 
-export_candid!();
+#[test]
+fn generate_candid() {
+	use candid::export_service;
+	use lib::save_candid;
+	export_service!();
+
+	save_candid::save_candid(__export_service(), "users".to_string());
+}

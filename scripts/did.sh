@@ -20,4 +20,5 @@ do
 done
 
 cd ..
+cargo test --test generate 
 dfx generate

@@ -10,6 +10,11 @@
 			"type": "rust",
 			"package": "nodes",
 			"candid": "candid/nodes.did"
+		},
+		"users": {
+			"type": "rust",
+			"package": "users",
+			"candid": "candid/users.did"
 		}
 	}
 }
