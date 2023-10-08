@@ -61,6 +61,7 @@ impl CircuitsStore {
 				id: state.circuit_id,
 				user_id: caller_principal,
 				name: post_circuit.name,
+				description: post_circuit.description,
 				is_favorite: false,
 				created_at: time(),
 				updated_at: time(),
