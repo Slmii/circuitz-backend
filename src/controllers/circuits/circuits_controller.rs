@@ -38,5 +38,5 @@ fn generate_candid() {
 	use lib::save_candid;
 	export_service!();
 
-	save_candid::save_candid(__export_service(), "users".to_string());
+	save_candid::save_candid(__export_service(), "circuits".to_string());
 }
