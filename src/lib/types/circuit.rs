@@ -1,7 +1,25 @@
 use std::borrow::Cow;
 use candid::{ CandidType, Principal, Decode, Encode };
 use ic_stable_structures::{ storable::Bound, Storable };
-use serde::Deserialize;
+use serde::{ Deserialize, Serialize };
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+pub struct CircuitKey {
+	pub id: u32,
+	pub owner: String,
+}
+
+impl Storable for CircuitKey {
+	fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+		Cow::Owned(Encode!(self).unwrap())
+	}
+
+	fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+		Decode!(bytes.as_ref(), Self).unwrap()
+	}
+
+	const BOUND: Bound = Bound::Unbounded;
+}
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct Circuit {

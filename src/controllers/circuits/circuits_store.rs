@@ -6,7 +6,7 @@ use ic_stable_structures::{
 	StableCell,
 	StableBTreeMap,
 };
-use lib::types::circuit::{ Circuit, PostCircuit };
+use lib::types::circuit::{ Circuit, PostCircuit, CircuitKey };
 use std::cell::RefCell;
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
@@ -26,7 +26,7 @@ thread_local! {
 	);
 
 	// (circuit_id, principal) -> Circuit
-	pub static CIRCUITS: RefCell<StableBTreeMap<(u32, String), Circuit, Memory>> = RefCell::new(
+	pub static CIRCUITS: RefCell<StableBTreeMap<CircuitKey, Circuit, Memory>> = RefCell::new(
 		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))))
 	);
 }
@@ -45,7 +45,7 @@ impl CircuitsStore {
 
 			circuits
 				.iter()
-				.filter(|((_, principal), _)| caller_principal.to_string() == *principal)
+				.filter(|(key, _)| caller_principal.to_string() == key.owner)
 				.map(|(_, circuit)| circuit.clone())
 				.collect::<Vec<Circuit>>()
 		})
@@ -85,7 +85,7 @@ impl CircuitsStore {
 			};
 
 			// Add new circuit
-			circuits.insert((circuit_id, caller_principal.to_string()), new_circuit.clone());
+			circuits.insert(CircuitKey { id: circuit_id, owner: caller_principal.to_string() }, new_circuit.clone());
 
 			new_circuit
 		})
