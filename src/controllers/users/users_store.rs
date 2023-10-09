@@ -1,15 +1,26 @@
-use candid::{ CandidType, Deserialize, Principal };
+use candid::Principal;
 use ic_cdk::api::time;
+use ic_stable_structures::{
+	memory_manager::{ VirtualMemory, MemoryManager, MemoryId },
+	DefaultMemoryImpl,
+	StableBTreeMap,
+};
 use lib::types::{ user::User, api_error::ApiError };
-use std::{ cell::RefCell, collections::HashMap };
+use std::cell::RefCell;
 
-#[derive(CandidType, Clone, Deserialize, Default)]
-pub struct UsersStore {
-	pub users: HashMap<Principal, User>,
-}
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
+pub struct UsersStore {}
 
 thread_local! {
-	pub static STATE: RefCell<UsersStore> = RefCell::new(UsersStore::default());
+	pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
+		MemoryManager::init(DefaultMemoryImpl::default())
+	);
+
+	// principal -> User
+	pub static USERS: RefCell<StableBTreeMap<String, User, Memory>> = RefCell::new(
+		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))))
+	);
 }
 
 impl UsersStore {
@@ -21,10 +32,10 @@ impl UsersStore {
 	/// # Returns
 	/// - `User` - User
 	pub fn get_user(caller_principal: Principal) -> Result<User, ApiError> {
-		STATE.with(|state| {
+		USERS.with(|state| {
 			let state = state.borrow();
 
-			let opt_user = state.users.get(&caller_principal);
+			let opt_user = state.get(&caller_principal.to_string());
 			opt_user.map_or(Err(ApiError::NotFound("USER_NOT_FOUND".to_string())), |user| Ok(user.clone()))
 		})
 	}
@@ -38,10 +49,10 @@ impl UsersStore {
 	/// # Returns
 	/// - `User` - User
 	pub async fn create_user(caller_principal: Principal, username: Option<String>) -> Result<User, ApiError> {
-		let user = STATE.with(|state| {
+		let user = USERS.with(|state| {
 			let mut state = state.borrow_mut();
 
-			if state.users.contains_key(&caller_principal) {
+			if state.contains_key(&caller_principal.to_string()) {
 				return Err(ApiError::AlreadyExists("USER_EXISTS".to_string()));
 			}
 
@@ -52,7 +63,7 @@ impl UsersStore {
 				circuits: vec![],
 			};
 
-			state.users.insert(caller_principal, user_to_add.clone());
+			state.insert(caller_principal.to_string(), user_to_add.clone());
 
 			Ok(user_to_add.clone())
 		});

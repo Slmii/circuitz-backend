@@ -1,20 +1,7 @@
-use crate::users_store::{ UsersStore, STATE };
-use ic_cdk::{ caller, storage };
-use ic_cdk_macros::{ post_upgrade, query, update, pre_upgrade };
+use crate::users_store::UsersStore;
+use ic_cdk::caller;
+use ic_cdk_macros::{ query, update };
 use lib::{ types::{ api_error::ApiError, user::User }, utils::validate_anonymous };
-
-#[pre_upgrade]
-fn pre_upgrade() {
-	STATE.with(|state| storage::stable_save((state,)).unwrap());
-}
-
-#[post_upgrade]
-fn post_upgrade() {
-	let (old_state,): (UsersStore,) = storage::stable_restore().unwrap();
-	STATE.with(|state| {
-		*state.borrow_mut() = old_state;
-	});
-}
 
 #[query]
 fn get_user() -> Result<User, ApiError> {

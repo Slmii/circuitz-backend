@@ -1,20 +1,34 @@
-use candid::{ CandidType, Deserialize, Principal };
+use candid::Principal;
 use ic_cdk::api::time;
+use ic_stable_structures::{
+	memory_manager::{ VirtualMemory, MemoryManager, MemoryId },
+	DefaultMemoryImpl,
+	StableCell,
+	StableBTreeMap,
+};
 use lib::types::circuit::{ Circuit, PostCircuit };
-use std::{ cell::RefCell, collections::HashMap };
+use std::cell::RefCell;
+type Memory = VirtualMemory<DefaultMemoryImpl>;
 
-#[derive(CandidType, Clone, Deserialize, Default)]
-pub struct CircuitsStore {
-	// Increment of circuit IDs
-	pub circuit_id: u32,
-	// All circuits in the system. u32 = circuit_id
-	pub circuits: HashMap<u32, Circuit>,
-	// Caller's circuits. Principal = caller, u32 = circuit_id
-	pub user_circuits: HashMap<Principal, Vec<u32>>,
-}
+pub struct CircuitsStore {}
 
 thread_local! {
-	pub static STATE: RefCell<CircuitsStore> = RefCell::new(CircuitsStore::default());
+	pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
+		MemoryManager::init(DefaultMemoryImpl::default())
+	);
+
+	// Circuit ID
+	pub static CIRCUIT_ID: RefCell<StableCell<u32, Memory>> = RefCell::new(
+		StableCell::init(
+			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+			0
+		).expect("Failed to initialize CIRCUIT_ID")
+	);
+
+	// (circuit_id, principal) -> Circuit
+	pub static CIRCUITS: RefCell<StableBTreeMap<(u32, String), Circuit, Memory>> = RefCell::new(
+		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))))
+	);
 }
 
 impl CircuitsStore {
@@ -26,18 +40,14 @@ impl CircuitsStore {
 	/// # Returns
 	/// - `Vec<Circuit>` - Circuits
 	pub fn get_user_circuits(caller_principal: Principal) -> Vec<Circuit> {
-		STATE.with(|state| {
-			let state = state.borrow();
+		CIRCUITS.with(|circuits| {
+			let circuits = circuits.borrow();
 
-			// Get user's circuits
-			let user_circuit_ids_by_principal = state.user_circuits.get(&caller_principal).cloned().unwrap_or_default();
-
-			// Loop through all circuits and check if the circuit_id contains in user's circuits list
-			state.circuits
-				.values()
-				.filter(|circuit| user_circuit_ids_by_principal.contains(&circuit.id))
-				.cloned()
-				.collect()
+			circuits
+				.iter()
+				.filter(|((_, principal), _)| caller_principal.to_string() == *principal)
+				.map(|(_, circuit)| circuit.clone())
+				.collect::<Vec<Circuit>>()
 		})
 	}
 
@@ -50,15 +60,20 @@ impl CircuitsStore {
 	/// # Returns
 	/// - `Circuit` - Added circuit
 	pub fn add_circuit(post_circuit: PostCircuit, caller_principal: Principal) -> Circuit {
-		STATE.with(|state| {
-			let mut state = state.borrow_mut();
+		let circuit_id = CIRCUIT_ID.with(|circuit_id| {
+			let mut circuit_id = circuit_id.borrow_mut().get().clone();
 
 			// Increment circuit ID
-			state.circuit_id += 1;
-			let circuit_id = state.circuit_id;
+			circuit_id += 1;
+
+			circuit_id
+		});
+
+		CIRCUITS.with(|circuits| {
+			let mut circuits = circuits.borrow_mut();
 
 			let new_circuit = Circuit {
-				id: state.circuit_id,
+				id: circuit_id,
 				user_id: caller_principal,
 				name: post_circuit.name,
 				description: post_circuit.description,
@@ -70,10 +85,7 @@ impl CircuitsStore {
 			};
 
 			// Add new circuit
-			state.circuits.insert(circuit_id, new_circuit.clone());
-
-			// Add circuit to user_circuit
-			state.user_circuits.entry(caller_principal).or_default().push(circuit_id);
+			circuits.insert((circuit_id, caller_principal.to_string()), new_circuit.clone());
 
 			new_circuit
 		})

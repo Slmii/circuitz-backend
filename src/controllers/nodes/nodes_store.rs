@@ -1,19 +1,41 @@
-use candid::{ CandidType, Deserialize, Principal };
-use lib::types::node::Node;
-use std::{ cell::RefCell, collections::HashMap };
+use candid::Principal;
+use ic_stable_structures::{
+	memory_manager::{ VirtualMemory, MemoryManager, MemoryId },
+	DefaultMemoryImpl,
+	StableCell,
+	StableVec,
+};
+use lib::types::{ node::Node, api_error::ApiError };
+use std::cell::RefCell;
+type Memory = VirtualMemory<DefaultMemoryImpl>;
 
-#[derive(CandidType, Clone, Deserialize, Default)]
-pub struct NodesStore {
-	// Increment of node IDs
-	pub node_id: u32,
-	// All nodes in the system. u32 = node_id
-	pub nodes: HashMap<u32, Node>,
-	// Caller's nodes. <(u32 = circuit_id, Principal = caller), u32 = node_id>
-	pub user_nodes: HashMap<(u32, Principal), Vec<u32>>,
-}
+pub struct NodesStore {}
 
 thread_local! {
-	pub static STATE: RefCell<NodesStore> = RefCell::new(NodesStore::default());
+	pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
+		MemoryManager::init(DefaultMemoryImpl::default())
+	);
+
+	// Node ID
+	pub static NODE_ID: RefCell<StableCell<u32, Memory>> = RefCell::new(
+		StableCell::init(
+			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+			0
+		).expect("Failed to initialize NODE_ID")
+	);
+
+	// Node ID -> Node
+	pub static NODES: RefCell<StableVec<Node, Memory>> = RefCell::new(
+		StableVec::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1)))).expect("Failed to initialize NODES")
+	);
+
+	// Canister owner
+	pub static CANISTER_OWNER: RefCell<StableCell<String, Memory>> = RefCell::new(
+		StableCell::init(
+			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(2))),
+			String::default()
+		).expect("Failed to initialize CANISTER_OWNER")
+	);
 }
 
 impl NodesStore {
@@ -25,22 +47,24 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Vec<Node>` - Nodes
-	pub fn get_circuit_nodes(circuit_id: u32, caller_principal: Principal) -> Vec<Node> {
-		STATE.with(|state| {
-			let state = state.borrow();
+	pub fn get_circuit_nodes(circuit_id: u32, caller_principal: Principal) -> Result<Vec<Node>, ApiError> {
+		let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let nodes = nodes.borrow();
+
+			if caller_principal.to_string() != *canister_owner {
+				// If the caller is not the canister owner, return an error
+				return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			}
 
 			// Get circuit's nodes
-			let node_ids_by_principal = state.user_nodes
-				.get(&(circuit_id, caller_principal))
-				.cloned()
-				.unwrap_or_default();
+			let circuit_nodes = nodes
+				.iter()
+				.filter(|node| node.circuit_id == circuit_id)
+				.collect::<Vec<Node>>();
 
-			// Loop through all nodes and check if the node_id contains in user's node list
-			state.nodes
-				.values()
-				.filter(|node| node_ids_by_principal.contains(&node.id))
-				.cloned()
-				.collect()
+			Ok(circuit_nodes)
 		})
 	}
 }
