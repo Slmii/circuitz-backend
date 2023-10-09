@@ -63,6 +63,8 @@ impl CircuitsStore {
 				name: post_circuit.name,
 				description: post_circuit.description,
 				is_favorite: false,
+				is_enabled: false,
+				run_at: None,
 				created_at: time(),
 				updated_at: time(),
 			};
