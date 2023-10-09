@@ -24,6 +24,21 @@ thread_local! {
 }
 
 impl UsersStore {
+	/// Get users.
+	///
+	/// # Returns
+	/// - `User` - User
+	pub fn get_users() -> Vec<User> {
+		USERS.with(|users| {
+			let users = users.borrow();
+
+			users
+				.iter()
+				.map(|(_, user)| user.clone())
+				.collect()
+		})
+	}
+
 	/// Get user by principal.
 	///
 	/// # Arguments
