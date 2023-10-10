@@ -1,7 +1,7 @@
 use candid::Principal;
 use ic_cdk::api::time;
 use ic_stable_structures::{ memory_manager::{ MemoryManager, MemoryId }, DefaultMemoryImpl, StableBTreeMap };
-use lib::types::{ circuit::{ Circuit, PostCircuit, CircuitKey }, memory::Memory };
+use lib::types::{ circuit::{ Circuit, PostCircuit, CircuitKey }, memory::Memory, api_error::ApiError };
 use std::cell::RefCell;
 
 pub struct CircuitsStore {}
@@ -40,11 +40,11 @@ impl CircuitsStore {
 	///
 	/// # Arguments
 	/// - `caller_principal` - Principal of the caller
-	/// - `post_circuit` - Circuit to add
+	/// - `post_circuit` - Circuit data
 	///
 	/// # Returns
 	/// - `Circuit` - Added circuit
-	pub fn add_circuit(post_circuit: PostCircuit, caller_principal: Principal) -> Circuit {
+	pub fn add_circuit(data: PostCircuit, caller_principal: Principal) -> Circuit {
 		CIRCUITS.with(|circuits| {
 			let mut circuits = circuits.borrow_mut();
 
@@ -57,8 +57,8 @@ impl CircuitsStore {
 			let new_circuit = Circuit {
 				id: circuit_id,
 				user_id: caller_principal,
-				name: post_circuit.name,
-				description: post_circuit.description,
+				name: data.name,
+				description: data.description,
 				is_favorite: false,
 				is_enabled: false,
 				run_at: None,
@@ -73,5 +73,35 @@ impl CircuitsStore {
 		})
 
 		// TODO: add a new node canister, make user the owner and add as a controller
+	}
+
+	/// Edit circuit.
+	///
+	/// # Arguments
+	/// - `circuit_id` - Circuit to edit
+	/// - `edit_circuit` - Circuit data
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Circuit` - Edited circuit
+	pub fn edit_circuit(circuit_id: u32, data: PostCircuit, caller_principal: Principal) -> Result<Circuit, ApiError> {
+		CIRCUITS.with(|circuits| {
+			let circuits = circuits.borrow();
+
+			// Get circuit by CircuitKey. If not found throw error
+			let circuit_key = CircuitKey { id: circuit_id, owner: caller_principal.to_string() };
+			let mut circuit = circuits.get(&circuit_key);
+
+			if circuit.is_none() {
+				return Err(ApiError::NotFound("NOT_FOUND".to_string()));
+			}
+
+			// Update circuit
+			circuit.as_mut().unwrap().name = data.name;
+			circuit.as_mut().unwrap().description = data.description;
+			circuit.as_mut().unwrap().updated_at = time();
+
+			Ok(circuit.as_ref().unwrap().clone())
+		})
 	}
 }

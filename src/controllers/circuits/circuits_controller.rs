@@ -12,9 +12,17 @@ fn get_user_circuits() -> Result<Vec<Circuit>, ApiError> {
 }
 
 #[update]
-fn add_circuit(post_circuit: PostCircuit) -> Result<Circuit, ApiError> {
+fn add_circuit(data: PostCircuit) -> Result<Circuit, ApiError> {
 	match validate_anonymous(&caller()) {
-		Ok(caller_principal) => Ok(CircuitsStore::add_circuit(post_circuit, caller_principal)),
+		Ok(caller_principal) => Ok(CircuitsStore::add_circuit(data, caller_principal)),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+fn edit_circuit(circuit_id: u32, data: PostCircuit) -> Result<Circuit, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => CircuitsStore::edit_circuit(circuit_id, data, caller_principal),
 		Err(err) => Err(err),
 	}
 }
