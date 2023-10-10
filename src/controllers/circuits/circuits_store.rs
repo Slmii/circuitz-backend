@@ -86,22 +86,27 @@ impl CircuitsStore {
 	/// - `Circuit` - Edited circuit
 	pub fn edit_circuit(circuit_id: u32, data: PostCircuit, caller_principal: Principal) -> Result<Circuit, ApiError> {
 		CIRCUITS.with(|circuits| {
-			let circuits = circuits.borrow();
+			let mut circuits = circuits.borrow_mut();
 
-			// Get circuit by CircuitKey. If not found throw error
+			// Find mutable circuit by CircuitKey. If not found throw error
 			let circuit_key = CircuitKey { id: circuit_id, owner: caller_principal.to_string() };
-			let mut circuit = circuits.get(&circuit_key);
+			let circuit = circuits.get(&circuit_key);
 
 			if circuit.is_none() {
-				return Err(ApiError::NotFound("NOT_FOUND".to_string()));
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
 			}
 
-			// Update circuit
-			circuit.as_mut().unwrap().name = data.name;
-			circuit.as_mut().unwrap().description = data.description;
-			circuit.as_mut().unwrap().updated_at = time();
+			let mut circuit = circuit.unwrap().clone();
 
-			Ok(circuit.as_ref().unwrap().clone())
+			// Mutate values
+			circuit.name = data.name;
+			circuit.description = data.description;
+			circuit.updated_at = time();
+
+			// Add new circuit or overwrite existing one
+			circuits.insert(circuit_key, circuit.clone());
+
+			Ok(circuit.clone())
 		})
 	}
 }

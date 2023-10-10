@@ -64,6 +64,8 @@ pub enum TraceStatus {
 pub struct TraceError {
 	pub code: String,
 	pub message: String,
+	pub source: String,
+	pub resolved_at: Option<u64>,
 	pub created_at: u64,
 	pub updated_at: u64,
 }

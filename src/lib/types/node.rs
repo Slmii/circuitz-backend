@@ -101,7 +101,7 @@ pub enum PinType {
 	/// You can use this Pin map data within a Node to a different format. A MapperPin will always be the first Pin to be executed within a Node.
 	MapperPin(Mapper),
 	/// You can use this Pin to filter the Node from being executed. A FilterPin will always be executed before the Node is executed.
-	Filter(Vec<ConditionGroup>),
+	FilterPin(Vec<ConditionGroup>),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
