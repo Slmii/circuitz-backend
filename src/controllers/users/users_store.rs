@@ -17,7 +17,6 @@ thread_local! {
 		MemoryManager::init(DefaultMemoryImpl::default())
 	);
 
-	// principal -> User
 	pub static USERS: RefCell<StableBTreeMap<String, User, Memory>> = RefCell::new(
 		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))))
 	);

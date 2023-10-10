@@ -17,7 +17,6 @@ thread_local! {
 		MemoryManager::init(DefaultMemoryImpl::default())
 	);
 
-	// Circuit ID
 	pub static CIRCUIT_ID: RefCell<StableCell<u32, Memory>> = RefCell::new(
 		StableCell::init(
 			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
@@ -25,7 +24,6 @@ thread_local! {
 		).expect("Failed to initialize CIRCUIT_ID")
 	);
 
-	// (circuit_id, principal) -> Circuit
 	pub static CIRCUITS: RefCell<StableBTreeMap<CircuitKey, Circuit, Memory>> = RefCell::new(
 		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))))
 	);

@@ -17,7 +17,6 @@ thread_local! {
 		MemoryManager::init(DefaultMemoryImpl::default())
 	);
 
-	// Node ID
 	pub static NODE_ID: RefCell<StableCell<u32, Memory>> = RefCell::new(
 		StableCell::init(
 			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
@@ -25,12 +24,10 @@ thread_local! {
 		).expect("Failed to initialize NODE_ID")
 	);
 
-	// Node ID -> Node
 	pub static NODES: RefCell<StableVec<Node, Memory>> = RefCell::new(
 		StableVec::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1)))).expect("Failed to initialize NODES")
 	);
 
-	// Canister owner
 	pub static CANISTER_OWNER: RefCell<StableCell<String, Memory>> = RefCell::new(
 		StableCell::init(
 			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(2))),
