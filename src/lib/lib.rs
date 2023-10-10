@@ -4,6 +4,8 @@ pub mod types {
 	pub mod node;
 	pub mod user;
 	pub mod notify;
+	pub mod memory;
+	pub mod trace;
 }
 
 pub mod utils;

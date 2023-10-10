@@ -15,6 +15,11 @@
 			"type": "rust",
 			"package": "users",
 			"candid": "candid/users.did"
+		},
+		"traces": {
+			"type": "rust",
+			"package": "traces",
+			"candid": "candid/traces.did"
 		}
 	}
 }

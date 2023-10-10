@@ -1564,6 +1564,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "traces"
+version = "0.1.0"
+dependencies = [
+ "candid 0.9.9",
+ "ic-cdk 0.11.0",
+ "ic-cdk-macros",
+ "ic-kit",
+ "ic-stable-structures",
+ "lib",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "tracing"
 version = "0.1.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"

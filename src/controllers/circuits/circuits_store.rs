@@ -1,27 +1,14 @@
 use candid::Principal;
 use ic_cdk::api::time;
-use ic_stable_structures::{
-	memory_manager::{ VirtualMemory, MemoryManager, MemoryId },
-	DefaultMemoryImpl,
-	StableCell,
-	StableBTreeMap,
-};
-use lib::types::circuit::{ Circuit, PostCircuit, CircuitKey };
+use ic_stable_structures::{ memory_manager::{ MemoryManager, MemoryId }, DefaultMemoryImpl, StableBTreeMap };
+use lib::types::{ circuit::{ Circuit, PostCircuit, CircuitKey }, memory::Memory };
 use std::cell::RefCell;
-type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 pub struct CircuitsStore {}
 
 thread_local! {
 	pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
 		MemoryManager::init(DefaultMemoryImpl::default())
-	);
-
-	pub static CIRCUIT_ID: RefCell<StableCell<u32, Memory>> = RefCell::new(
-		StableCell::init(
-			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
-			0
-		).expect("Failed to initialize CIRCUIT_ID")
 	);
 
 	pub static CIRCUITS: RefCell<StableBTreeMap<CircuitKey, Circuit, Memory>> = RefCell::new(
@@ -58,17 +45,14 @@ impl CircuitsStore {
 	/// # Returns
 	/// - `Circuit` - Added circuit
 	pub fn add_circuit(post_circuit: PostCircuit, caller_principal: Principal) -> Circuit {
-		let circuit_id = CIRCUIT_ID.with(|circuit_id| {
-			let mut circuit_id = circuit_id.borrow_mut().get().clone();
-
-			// Increment circuit ID
-			circuit_id += 1;
-
-			circuit_id
-		});
-
 		CIRCUITS.with(|circuits| {
 			let mut circuits = circuits.borrow_mut();
+
+			let circuit_id =
+				circuits
+					.last_key_value()
+					.map(|(key, _)| key.id)
+					.unwrap_or(0) + 1;
 
 			let new_circuit = Circuit {
 				id: circuit_id,

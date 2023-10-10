@@ -1,14 +1,8 @@
 use candid::Principal;
 use ic_cdk::api::time;
-use ic_stable_structures::{
-	memory_manager::{ VirtualMemory, MemoryManager, MemoryId },
-	DefaultMemoryImpl,
-	StableBTreeMap,
-};
-use lib::types::{ user::User, api_error::ApiError };
+use ic_stable_structures::{ memory_manager::{ MemoryManager, MemoryId }, DefaultMemoryImpl, StableBTreeMap };
+use lib::types::{ user::User, api_error::ApiError, memory::Memory };
 use std::cell::RefCell;
-
-type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 pub struct UsersStore {}
 
