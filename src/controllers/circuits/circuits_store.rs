@@ -71,5 +71,7 @@ impl CircuitsStore {
 
 			new_circuit
 		})
+
+		// TODO: add a new node canister, make user the owner and add as a controller
 	}
 }
