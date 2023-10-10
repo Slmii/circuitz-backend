@@ -1,4 +1,5 @@
 use candid::Principal;
+use ic_cdk::id;
 use ic_stable_structures::{
 	memory_manager::{ VirtualMemory, MemoryManager, MemoryId },
 	DefaultMemoryImpl,
@@ -39,7 +40,7 @@ thread_local! {
 }
 
 impl NodesStore {
-	/// Get nodes by principal.
+	/// Get nodes by circuit ID.
 	///
 	/// # Arguments
 	/// - `circuit_id` - Circuit ID
@@ -47,13 +48,13 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Vec<Node>` - Nodes
-	pub fn get_circuit_nodes(circuit_id: u32, caller_principal: Principal) -> Result<Vec<Node>, ApiError> {
+	pub fn get_circuit_nodes(circuit_id: u32, caller_principal: Principal) -> Result<(Principal, Vec<Node>), ApiError> {
 		let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
 
 		NODES.with(|nodes| {
 			let nodes = nodes.borrow();
 
-			if caller_principal.to_string() != *canister_owner {
+			if caller_principal.to_string() != canister_owner {
 				// If the caller is not the canister owner, return an error
 				return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
 			}
@@ -64,7 +65,7 @@ impl NodesStore {
 				.filter(|node| node.circuit_id == circuit_id)
 				.collect::<Vec<Node>>();
 
-			Ok(circuit_nodes)
+			Ok((id(), circuit_nodes))
 		})
 	}
 }
