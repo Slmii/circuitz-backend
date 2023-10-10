@@ -17,6 +17,30 @@ thread_local! {
 }
 
 impl CircuitsStore {
+	/// Get circuit by id.
+	///
+	/// # Arguments
+	/// - `circuit_id` - Circuit ID
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Circuit` - Circuit
+	pub fn get_circuit(circuit_id: u32, caller_principal: Principal) -> Result<Circuit, ApiError> {
+		CIRCUITS.with(|circuits| {
+			let circuits = circuits.borrow();
+
+			// Find circuit by CircuitKey. If not found throw error
+			let circuit_key = CircuitKey { id: circuit_id, owner: caller_principal.to_string() };
+			let circuit = circuits.get(&circuit_key);
+
+			if circuit.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			Ok(circuit.unwrap().clone())
+		})
+	}
+
 	/// Get circuits by principal.
 	///
 	/// # Arguments
@@ -40,7 +64,7 @@ impl CircuitsStore {
 	///
 	/// # Arguments
 	/// - `caller_principal` - Principal of the caller
-	/// - `post_circuit` - Circuit data
+	/// - `data` - Circuit data
 	///
 	/// # Returns
 	/// - `Circuit` - Added circuit
@@ -78,8 +102,8 @@ impl CircuitsStore {
 	/// Edit circuit.
 	///
 	/// # Arguments
-	/// - `circuit_id` - Circuit to edit
-	/// - `edit_circuit` - Circuit data
+	/// - `circuit_id` - Circuit ID
+	/// - `data` - Circuit data
 	/// - `caller_principal` - Principal of the caller
 	///
 	/// # Returns
