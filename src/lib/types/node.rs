@@ -75,9 +75,9 @@ pub struct Ouput {
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Input {
 	name: String,
-	description: Option<String>,
 	verification_type: VerificationType,
-	sample_data: String,
+	description: Option<String>,
+	sample_data: Option<String>,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
