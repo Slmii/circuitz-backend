@@ -37,7 +37,10 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Vec<Node>` - Nodes
-	pub fn get_circuit_nodes(circuit_id: u32, caller_principal: Principal) -> Result<(Principal, Vec<Node>), ApiError> {
+	pub fn get_circuit_nodes(
+		circuit_id: u32,
+		_caller_principal: Principal
+	) -> Result<(Principal, Vec<Node>), ApiError> {
 		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
 
 		NODES.with(|nodes| {

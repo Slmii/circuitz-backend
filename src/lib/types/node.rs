@@ -9,7 +9,7 @@ pub struct Node {
 	pub user_id: Principal,
 	pub circuit_id: u32,
 	pub order: u32,
-	pub is_active: bool,
+	pub is_enabled: bool,
 	pub is_error: bool,
 	pub is_finished: bool,
 	pub node_type: NodeType,
@@ -38,7 +38,7 @@ impl Default for Node {
 			user_id: Principal::anonymous(),
 			circuit_id: Default::default(),
 			order: Default::default(),
-			is_active: Default::default(),
+			is_enabled: Default::default(),
 			is_error: Default::default(),
 			is_finished: Default::default(),
 			node_type: NodeType::Transformer(Transformer {
@@ -81,9 +81,15 @@ pub struct Input {
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub enum VerificationType {
-	Token(String),
+	Token(Token),
 	Whitelist(Vec<Principal>),
 	SampleData(String),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Token {
+	token: String,
+	field: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
