@@ -77,13 +77,13 @@ pub struct Input {
 	name: String,
 	description: Option<String>,
 	verification_type: VerificationType,
+	sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub enum VerificationType {
 	Token(Token),
 	Whitelist(Vec<Principal>),
-	SampleData(String),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
