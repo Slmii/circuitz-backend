@@ -62,6 +62,8 @@ pub enum NodeType {
 	/// Define one or more mappings to transform the data returned by the Node to different specified fields.
 	Mapper(Mapper),
 	Ouput(Ouput),
+	/// Define a lookup to retrieve data from a different Canister.
+	Lookup(Lookup),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -78,6 +80,14 @@ pub struct Input {
 	verification_type: VerificationType,
 	description: Option<String>,
 	sample_data: Option<String>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Lookup {
+	name: String,
+	description: Option<String>,
+	canister: Principal,
+	method: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
