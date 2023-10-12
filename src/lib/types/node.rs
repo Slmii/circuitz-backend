@@ -82,6 +82,7 @@ pub struct Input {
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub enum VerificationType {
+	None,
 	Token(Token),
 	Whitelist(Vec<Principal>),
 }
