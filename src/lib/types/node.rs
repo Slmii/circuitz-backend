@@ -11,7 +11,7 @@ pub struct Node {
 	pub order: u32,
 	pub is_enabled: bool,
 	pub is_error: bool,
-	pub is_finished: bool,
+	pub is_running: bool,
 	pub node_type: NodeType,
 	// AKA "hooks"
 	pub pin: Vec<Pin>,
@@ -40,7 +40,7 @@ impl Default for Node {
 			order: Default::default(),
 			is_enabled: Default::default(),
 			is_error: Default::default(),
-			is_finished: Default::default(),
+			is_running: Default::default(),
 			node_type: NodeType::Transformer(Transformer {
 				input: Default::default(),
 				output: Default::default(),

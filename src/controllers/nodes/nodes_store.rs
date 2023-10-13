@@ -1,12 +1,12 @@
 use candid::Principal;
-use ic_cdk::id;
+use ic_cdk::{ id, api::time };
 use ic_stable_structures::{
 	memory_manager::{ MemoryManager, MemoryId },
 	DefaultMemoryImpl,
 	StableCell,
 	StableBTreeMap,
 };
-use lib::types::{ node::Node, api_error::ApiError, memory::Memory };
+use lib::types::{ node::{ Node, NodeType }, api_error::ApiError, memory::Memory };
 use std::cell::RefCell;
 
 pub struct NodesStore {}
@@ -29,6 +29,24 @@ thread_local! {
 }
 
 impl NodesStore {
+	/// Get node canister ID.
+	///
+	/// # Arguments
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Principal` - Canister ID
+	pub fn get_node_canister_id(_caller_principal: Principal) -> Result<Principal, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		// if caller_principal.to_string() != canister_owner {
+		// 	// If the caller is not the canister owner, return an error
+		// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+		// }
+
+		Ok(id())
+	}
+
 	/// Get nodes by circuit ID.
 	///
 	/// # Arguments
@@ -59,6 +77,48 @@ impl NodesStore {
 				.collect::<Vec<Node>>();
 
 			Ok((id(), circuit_nodes))
+		})
+	}
+
+	/// Add a node to a circuit.
+	///
+	/// # Arguments
+	/// - `circuit_id` - Circuit ID
+	/// - `data` - Node data
+	///
+	/// # Returns
+	/// - `Node` - Node
+	pub fn add_node(circuit_id: u32, data: NodeType, caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let mut nodes = nodes.borrow_mut();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			let node_id = (nodes.len() as u32) + 1;
+
+			let new_node = Node {
+				id: node_id,
+				circuit_id,
+				user_id: caller_principal,
+				is_enabled: true,
+				is_error: false,
+				is_running: false,
+				node_type: data,
+				order: node_id, // node_id is the order
+				pin: vec![],
+				created_at: time(),
+				updated_at: time(),
+			};
+
+			// Add new node
+			nodes.insert(node_id, new_node.clone());
+
+			Ok(new_node)
 		})
 	}
 }

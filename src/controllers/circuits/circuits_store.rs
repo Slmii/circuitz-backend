@@ -84,6 +84,7 @@ impl CircuitsStore {
 				name: data.name,
 				description: data.description,
 				is_favorite: false,
+				is_running: false,
 				is_enabled: false,
 				run_at: None,
 				created_at: time(),
