@@ -21,6 +21,14 @@ fn add_node(circuit_id: u32, data: NodeType) -> Result<Node, ApiError> {
 	}
 }
 
+#[update]
+fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::edit_node(node_id, data, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
 // #[query]
 // fn test(json: String, key: String) -> String {
 // 	let v: Value = serde_json::from_str(json.as_str()).expect("JSON was not well-formatted");
