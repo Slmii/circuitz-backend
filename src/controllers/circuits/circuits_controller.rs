@@ -20,6 +20,22 @@ fn get_user_circuits() -> Result<Vec<Circuit>, ApiError> {
 }
 
 #[update]
+fn enable_circuit(circuit_id: u32) -> Result<Circuit, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => CircuitsStore::toggle_circuit(circuit_id, true, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+fn disable_circuit(circuit_id: u32) -> Result<Circuit, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => CircuitsStore::toggle_circuit(circuit_id, false, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
 fn add_circuit(data: PostCircuit) -> Result<Circuit, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => Ok(CircuitsStore::add_circuit(data, caller_principal)),

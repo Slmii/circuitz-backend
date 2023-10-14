@@ -134,4 +134,37 @@ impl CircuitsStore {
 			Ok(circuit.clone())
 		})
 	}
+
+	/// Toggle enable/disable circuit.
+	///
+	/// # Arguments
+	/// - `circuit_id` - Circuit ID
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Circuit` - Enabled circuit
+	pub fn toggle_circuit(circuit_id: u32, enabled: bool, caller_principal: Principal) -> Result<Circuit, ApiError> {
+		CIRCUITS.with(|circuits| {
+			let mut circuits = circuits.borrow_mut();
+
+			// Find mutable circuit by CircuitKey. If not found throw error
+			let circuit_key = CircuitKey { id: circuit_id, owner: caller_principal.to_string() };
+			let circuit = circuits.get(&circuit_key);
+
+			if circuit.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			let mut circuit = circuit.unwrap().clone();
+
+			// Mutate values
+			circuit.is_enabled = enabled;
+			circuit.updated_at = time();
+
+			// Add new circuit or overwrite existing one
+			circuits.insert(circuit_key, circuit.clone());
+
+			Ok(circuit.clone())
+		})
+	}
 }
