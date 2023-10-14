@@ -25,6 +25,7 @@ impl Storable for CircuitKey {
 pub struct Circuit {
 	pub id: u32,
 	pub user_id: Principal,
+	pub node_canister_ids: Vec<(u32, Principal)>,
 	pub name: String,
 	pub description: Option<String>,
 	pub is_favorite: bool,
@@ -52,6 +53,7 @@ impl Default for Circuit {
 		Self {
 			id: Default::default(),
 			user_id: Principal::anonymous(),
+			node_canister_ids: Default::default(),
 			name: Default::default(),
 			description: Default::default(),
 			is_favorite: Default::default(),

@@ -81,6 +81,7 @@ impl CircuitsStore {
 			let new_circuit = Circuit {
 				id: circuit_id,
 				user_id: caller_principal,
+				node_canister_ids: vec![],
 				name: data.name,
 				description: data.description,
 				is_favorite: false,
