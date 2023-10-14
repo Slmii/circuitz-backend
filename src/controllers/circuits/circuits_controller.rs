@@ -1,3 +1,4 @@
+use candid::Principal;
 use ic_cdk::caller;
 use ic_cdk_macros::{ query, update };
 use lib::{ types::{ circuit::{ Circuit, PostCircuit }, api_error::ApiError }, utils::validate_anonymous };
@@ -15,6 +16,14 @@ fn get_circuit(circuit_id: u32) -> Result<Circuit, ApiError> {
 fn get_user_circuits() -> Result<Vec<Circuit>, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => Ok(CircuitsStore::get_user_circuits(caller_principal)),
+		Err(err) => Err(err),
+	}
+}
+
+#[query]
+fn get_node_canister_id(circuit_id: u32) -> Result<Principal, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => CircuitsStore::get_node_canister_id(circuit_id, caller_principal),
 		Err(err) => Err(err),
 	}
 }

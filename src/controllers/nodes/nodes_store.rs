@@ -29,24 +29,6 @@ thread_local! {
 }
 
 impl NodesStore {
-	/// Get node canister ID.
-	///
-	/// # Arguments
-	/// - `caller_principal` - Principal of the caller
-	///
-	/// # Returns
-	/// - `Principal` - Canister ID
-	pub fn get_node_canister_id(_caller_principal: Principal) -> Result<Principal, ApiError> {
-		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
-
-		// if caller_principal.to_string() != canister_owner {
-		// 	// If the caller is not the canister owner, return an error
-		// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
-		// }
-
-		Ok(id())
-	}
-
 	/// Get nodes by circuit ID.
 	///
 	/// # Arguments

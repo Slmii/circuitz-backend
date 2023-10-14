@@ -13,14 +13,6 @@ fn get_circuit_nodes(circuit_id: u32) -> Result<(Principal, Vec<Node>), ApiError
 	}
 }
 
-#[query]
-fn get_node_canister_id() -> Result<Principal, ApiError> {
-	match validate_anonymous(&caller()) {
-		Ok(caller_principal) => NodesStore::get_node_canister_id(caller_principal),
-		Err(err) => Err(err),
-	}
-}
-
 #[update]
 fn add_node(circuit_id: u32, data: NodeType) -> Result<Node, ApiError> {
 	match validate_anonymous(&caller()) {

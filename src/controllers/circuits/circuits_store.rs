@@ -60,6 +60,20 @@ impl CircuitsStore {
 		})
 	}
 
+	/// Get node canister ID.
+	///
+	/// # Arguments
+	/// - `circuit_id` - Circuit ID
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Principal` - Canister ID of the node
+	pub fn get_node_canister_id(circuit_id: u32, _caller_principal: Principal) -> Result<Principal, ApiError> {
+		let circuit = Self::get_circuit(circuit_id, _caller_principal)?;
+
+		Ok(circuit.node_canister_id)
+	}
+
 	/// Add circuit.
 	///
 	/// # Arguments
@@ -81,7 +95,7 @@ impl CircuitsStore {
 			let new_circuit = Circuit {
 				id: circuit_id,
 				user_id: caller_principal,
-				node_canister_ids: vec![],
+				node_canister_id: Principal::anonymous(),
 				name: data.name,
 				description: data.description,
 				is_favorite: false,
