@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{ borrow::Cow, collections::HashMap };
 use candid::{ CandidType, Principal, Decode, Encode };
 use ic_stable_structures::{ storable::Bound, Storable };
 use serde::Deserialize;
@@ -54,16 +54,14 @@ impl Default for Node {
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum NodeType {
-	Input(Input),
-	/// Pins represent well defined places where custom code can be injected into a Node.
-	Pin(Pin),
-	/// Define a transformation rule to rename fields, remove fields, and/or structurally optimize the response data returned by the Node before the response data is merged back into the source record.
+	Canister(Canister),
+	/// Define a transformation rule to and fields to the response data returned by the previous Node, while keeping all other fields
 	Transformer(Transformer),
 	/// Define one or more mappings to transform the data returned by the Node to different specified fields.
 	Mapper(Mapper),
 	Ouput(Ouput),
-	/// Define a lookup to retrieve data from a different Canister.
-	Lookup(Lookup),
+	/// Define a request to retrieve/post data from/to a different endpoint.
+	Request(Request),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -75,7 +73,7 @@ pub struct Ouput {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Input {
+pub struct Canister {
 	name: String,
 	verification_type: VerificationType,
 	description: Option<String>,
@@ -83,11 +81,38 @@ pub struct Input {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Lookup {
+pub struct Request {
 	name: String,
 	description: Option<String>,
+	// Request can be either fetching data or posting data
+	request_type: RequestType,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum RequestType {
+	RequestCanister(RequestCanister),
+	RequestHttp(RequestHttp),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct RequestCanister {
 	canister: Principal,
 	method: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct RequestHttp {
+	url: String,
+	method: RequestHttpMethod,
+	// Store header name and value
+	headers: HashMap<String, String>,
+	request_body: Option<String>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum RequestHttpMethod {
+	GET,
+	POST,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
