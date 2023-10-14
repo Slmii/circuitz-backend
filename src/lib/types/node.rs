@@ -1,7 +1,14 @@
-use std::{ borrow::Cow, collections::HashMap };
+use std::borrow::Cow;
 use candid::{ CandidType, Principal, Decode, Encode };
 use ic_stable_structures::{ storable::Bound, Storable };
 use serde::Deserialize;
+
+use super::{
+	node_type_canister::Canister,
+	node_type_lookup::Lookup,
+	node_pin::Pin,
+	node_type_http_request::HttpRequest,
+};
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct Node {
@@ -54,135 +61,16 @@ impl Default for Node {
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum NodeType {
+	/// Canister or HttpRequest will both act as the Input Node
 	Canister(Canister),
+	HttpRequest(HttpRequest),
 	/// Define a transformation rule to and fields to the response data returned by the previous Node, while keeping all other fields
 	Transformer(Transformer),
 	/// Define one or more mappings to transform the data returned by the Node to different specified fields.
 	Mapper(Mapper),
 	Ouput(Ouput),
-	/// Define a request to retrieve/post data from/to a different endpoint.
-	Request(Request),
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Ouput {
-	name: String,
-	description: Option<String>,
-	canister: Principal,
-	method: String,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Canister {
-	name: String,
-	verification_type: VerificationType,
-	description: Option<String>,
-	sample_data: Option<String>,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Request {
-	name: String,
-	description: Option<String>,
-	// Request can be either fetching data or posting data
-	request_type: RequestType,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum RequestType {
-	RequestCanister(RequestCanister),
-	RequestHttp(RequestHttp),
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct RequestCanister {
-	canister: Principal,
-	method: String,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct RequestHttp {
-	url: String,
-	method: RequestHttpMethod,
-	// Store header name and value
-	headers: HashMap<String, String>,
-	request_body: Option<String>,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum RequestHttpMethod {
-	GET,
-	POST,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum VerificationType {
-	None,
-	Token(Token),
-	Whitelist(Vec<Principal>),
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Token {
-	token: String,
-	field: String,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Pin {
-	pin_type: PinType,
-	order: u32,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum PinType {
-	/// You can use this Pin to apply JS logic to the data within a Node prior starting the Node.
-	PrePin(CustomPinLogic),
-	/// You can use this Pin to apply JS logic to the data within a Node after the Node has finished.
-	PostResponsePin(CustomPinLogic),
-	/// You can use this Pin map data within a Node to a different format. A MapperPin will always be the first Pin to be executed within a Node.
-	MapperPin(Mapper),
-	/// You can use this Pin to filter the Node from being executed. A FilterPin will always be executed before the Node is executed.
-	FilterPin(Vec<ConditionGroup>),
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct CustomPinLogic {
-	function: Option<String>,
-	script: Option<String>,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct ConditionGroup {
-	condition: Condition,
-	condition_group_type: Option<ConditionGroupType>,
-	field: String,
-	operator: Operator,
-	value: String,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum Condition {
-	Not,
-	Is,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum ConditionGroupType {
-	And,
-	Or,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum Operator {
-	Equal,
-	NotEqual,
-	GreaterThan,
-	LessThan,
-	GreaterThanOrEqual,
-	LessThanOrEqual,
-	In,
-	NotIn,
+	/// Define a lookup request to retrieve data from a different endpoint.
+	Lookup(Lookup),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -197,4 +85,12 @@ pub struct Mapper {
 	output: String,
 	// Either upload an IDL and read the fields or make a 'sample' request and read the fields
 	interface: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Ouput {
+	name: String,
+	description: Option<String>,
+	canister: Principal,
+	method: String,
 }
