@@ -71,7 +71,7 @@ pub enum NodeType {
 	Transformer(Transformer),
 	/// Define one or more mappings to transform the data returned by the Node to different specified fields.
 	Mapper(Mapper),
-	Ouput(Ouput),
+	Output(Output),
 
 	/// Define a lookup request to retrieve data from a different endpoint.
 	LookupCanister(LookupCanister),
@@ -79,7 +79,7 @@ pub enum NodeType {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Ouput {
+pub struct Output {
 	name: String,
 	description: Option<String>,
 	canister: Principal,
