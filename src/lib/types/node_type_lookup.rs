@@ -26,6 +26,7 @@ pub struct LookupHttpRequest {
 pub enum Arg {
 	String(String),
 	Number(u32),
+	Principal(Principal),
 	BigInt(u64),
 	Boolean(bool),
 	Array(Vec<Arg>),
