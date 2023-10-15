@@ -5,6 +5,8 @@ use super::headers::Headers;
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct HttpRequest {
+	name: String,
+	description: Option<String>,
 	url: String,
 	method: HttpRequestMethod,
 	// Store header name and value

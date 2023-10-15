@@ -5,9 +5,11 @@ use serde::Deserialize;
 
 use super::{
 	node_type_canister::Canister,
-	node_type_lookup::Lookup,
+	node_type_lookup::LookupCanister,
 	node_pin::Pin,
 	node_type_http_request::HttpRequest,
+	node_type_transformer::Transformer,
+	node_type_mapper::Mapper,
 };
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -64,27 +66,16 @@ pub enum NodeType {
 	/// Canister or HttpRequest will both act as the Input Node
 	Canister(Canister),
 	HttpRequest(HttpRequest),
+
 	/// Define a transformation rule to and fields to the response data returned by the previous Node, while keeping all other fields
 	Transformer(Transformer),
 	/// Define one or more mappings to transform the data returned by the Node to different specified fields.
 	Mapper(Mapper),
 	Ouput(Ouput),
+
 	/// Define a lookup request to retrieve data from a different endpoint.
-	Lookup(Lookup),
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Transformer {
-	input: String,
-	output: String,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Mapper {
-	input: String,
-	output: String,
-	// Either upload an IDL and read the fields or make a 'sample' request and read the fields
-	interface: String,
+	LookupCanister(LookupCanister),
+	LookupHttpRequest(HttpRequest),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]

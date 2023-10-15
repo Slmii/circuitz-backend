@@ -1,12 +1,12 @@
-use candid::Principal;
-use ic_cdk::{ id, api::time };
+use candid::{ Principal, Encode };
+use ic_cdk::{ id, api::{ time, call::{ RejectionCode, self } } };
 use ic_stable_structures::{
 	memory_manager::{ MemoryManager, MemoryId },
 	DefaultMemoryImpl,
 	StableCell,
 	StableBTreeMap,
 };
-use lib::types::{ node::{ Node, NodeType }, api_error::ApiError, memory::Memory };
+use lib::types::{ node::{ Node, NodeType }, api_error::ApiError, memory::Memory, node_type_lookup::LookupCanister };
 use std::cell::RefCell;
 
 pub struct NodesStore {}
@@ -114,7 +114,7 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Node` - Node
-	pub fn edit_node(node_id: u32, data: NodeType, caller_principal: Principal) -> Result<Node, ApiError> {
+	pub fn edit_node(node_id: u32, data: NodeType, _caller_principal: Principal) -> Result<Node, ApiError> {
 		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
 
 		NODES.with(|nodes| {
@@ -142,5 +142,32 @@ impl NodesStore {
 
 			Ok(node)
 		})
+	}
+
+	/// Preview lookup canister request
+	///
+	/// # Arguments
+	/// - `data` - LookupCanister
+	///
+	/// # Returns
+	/// - `Unknown` - Unknown data from the canister
+	pub async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
+		let bytes = Encode!(&data.args);
+
+		match bytes {
+			Ok(bytes) => {
+				let response: Result<(String,), (RejectionCode, String)> = call::call(data.canister, &data.method, (
+					bytes,
+				)).await;
+
+				match response {
+					Ok((response,)) => { Ok(response) }
+					Err((_, string)) => Err(ApiError::InterCanister(string)),
+				}
+			}
+			Err(_) => {
+				return Err(ApiError::InterCanister("Failed to encode bytes".to_string()));
+			}
+		}
 	}
 }

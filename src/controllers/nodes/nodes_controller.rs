@@ -1,7 +1,10 @@
 use candid::Principal;
 use ic_cdk::caller;
 use ic_cdk_macros::{ query, update };
-use lib::{ types::{ node::{ Node, NodeType }, api_error::ApiError }, utils::validate_anonymous };
+use lib::{
+	types::{ node::{ Node, NodeType }, api_error::ApiError, node_type_lookup::LookupCanister },
+	utils::validate_anonymous,
+};
 // use serde_json::Value;
 use crate::nodes_store::NodesStore;
 
@@ -25,6 +28,14 @@ fn add_node(circuit_id: u32, data: NodeType) -> Result<Node, ApiError> {
 fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::edit_node(node_id, data, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(_) => NodesStore::preview_lookup_request(data).await,
 		Err(err) => Err(err),
 	}
 }

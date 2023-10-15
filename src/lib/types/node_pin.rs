@@ -1,7 +1,7 @@
 use candid::CandidType;
 use serde::Deserialize;
 
-use super::node_mapper::Mapper;
+use super::node_type_mapper::Mapper;
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Pin {

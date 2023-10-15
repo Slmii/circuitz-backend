@@ -6,4 +6,5 @@ pub enum ApiError {
 	Unauthorized(String),
 	NotFound(String),
 	AlreadyExists(String),
+	InterCanister(String),
 }
