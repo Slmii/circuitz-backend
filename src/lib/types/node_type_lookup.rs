@@ -31,4 +31,5 @@ pub enum Arg {
 	Boolean(bool),
 	Array(Vec<Arg>),
 	Object(HashMap<String, Arg>),
+	Field(String),
 }
