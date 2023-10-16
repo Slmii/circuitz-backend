@@ -1,12 +1,18 @@
-use candid::{ Principal, Encode };
-use ic_cdk::{ id, api::{ time, call::{ RejectionCode, self } } };
+use candid::{ Principal, encode_args };
+use ic_cdk::{ id, api::{ time, call::call_raw } };
 use ic_stable_structures::{
 	memory_manager::{ MemoryManager, MemoryId },
 	DefaultMemoryImpl,
 	StableCell,
 	StableBTreeMap,
 };
-use lib::types::{ node::{ Node, NodeType }, api_error::ApiError, memory::Memory, node_type_lookup::LookupCanister };
+use lib::types::{
+	node::{ Node, NodeType },
+	api_error::ApiError,
+	memory::Memory,
+	node_type_lookup::{ LookupCanister, Arg },
+	tuple_variant::TupleVariant,
+};
 use std::cell::RefCell;
 
 pub struct NodesStore {}
@@ -151,23 +157,140 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Unknown` - Unknown data from the canister
-	pub async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
-		let bytes = Encode!(&data.args);
+	pub async fn preview_lookup_request(data: LookupCanister) -> Result<Vec<u8>, ApiError> {
+		let to_tuple = Self::vec_to_tuple(data.args);
 
-		match bytes {
-			Ok(bytes) => {
-				let response: Result<(String,), (RejectionCode, String)> = call::call(data.canister, &data.method, (
-					bytes,
-				)).await;
+		match to_tuple {
+			Ok(tuple) => {
+				match tuple {
+					TupleVariant::One(variant) => {
+						match variant {
+							Arg::Number(number) => {
+								let args_raw = encode_args((number,)).unwrap();
+								let response = call_raw(data.canister, &data.method, args_raw, 0).await;
 
-				match response {
-					Ok((response,)) => { Ok(response) }
-					Err((_, string)) => Err(ApiError::InterCanister(string)),
+								// let response: Result<(String,), (RejectionCode, String)> = call::call(
+								// 	data.canister,
+								// 	&data.method,
+								// 	(number,)
+								// ).await;
+
+								match response {
+									Ok(bytes) => Ok(bytes),
+									Err((_, message)) => Err(ApiError::InterCanister(message)),
+								}
+							}
+							_ => {
+								return Err(ApiError::InterCanister("Failed to convert to tuple".to_string()));
+							}
+						}
+					}
+					_ => {
+						return Err(ApiError::InterCanister("Failed to convert to tuple".to_string()));
+					}
 				}
 			}
-			Err(_) => {
-				return Err(ApiError::InterCanister("Failed to encode bytes".to_string()));
-			}
+			Err(_) => Err(ApiError::InterCanister("Failed to convert to tuple".to_string())),
 		}
 	}
+
+	fn vec_to_tuple<T: Clone>(v: Vec<T>) -> Result<TupleVariant<T>, &'static str> {
+		match v.len() {
+			0 => Err("Vec is empty"),
+			1 => Ok(TupleVariant::One(v[0].clone())),
+			2 => Ok(TupleVariant::Two(v[0].clone(), v[1].clone())),
+			3 => Ok(TupleVariant::Three(v[0].clone(), v[1].clone(), v[2].clone())),
+			4 => Ok(TupleVariant::Four(v[0].clone(), v[1].clone(), v[2].clone(), v[3].clone())),
+			5 => Ok(TupleVariant::Five(v[0].clone(), v[1].clone(), v[2].clone(), v[3].clone(), v[4].clone())),
+			6 =>
+				Ok(
+					TupleVariant::Six(
+						v[0].clone(),
+						v[1].clone(),
+						v[2].clone(),
+						v[3].clone(),
+						v[4].clone(),
+						v[5].clone()
+					)
+				),
+			7 =>
+				Ok(
+					TupleVariant::Seven(
+						v[0].clone(),
+						v[1].clone(),
+						v[2].clone(),
+						v[3].clone(),
+						v[4].clone(),
+						v[5].clone(),
+						v[6].clone()
+					)
+				),
+			8 =>
+				Ok(
+					TupleVariant::Eight(
+						v[0].clone(),
+						v[1].clone(),
+						v[2].clone(),
+						v[3].clone(),
+						v[4].clone(),
+						v[5].clone(),
+						v[6].clone(),
+						v[7].clone()
+					)
+				),
+			9 =>
+				Ok(
+					TupleVariant::Nine(
+						v[0].clone(),
+						v[1].clone(),
+						v[2].clone(),
+						v[3].clone(),
+						v[4].clone(),
+						v[5].clone(),
+						v[6].clone(),
+						v[7].clone(),
+						v[8].clone()
+					)
+				),
+			10 =>
+				Ok(
+					TupleVariant::Ten(
+						v[0].clone(),
+						v[1].clone(),
+						v[2].clone(),
+						v[3].clone(),
+						v[4].clone(),
+						v[5].clone(),
+						v[6].clone(),
+						v[7].clone(),
+						v[8].clone(),
+						v[9].clone()
+					)
+				),
+			// You can continue this pattern for as many sizes as you wish to handle
+			_ => Err("Vec is too large to convert to a known tuple size"),
+		}
+	}
+
+	// pub async fn preview_lookup_request<T: ArgumentEncoder, R: for<'a> ArgumentDecoder<'a>>(
+	// 	data: LookupCanister,
+	// 	args: T
+	// ) -> Result<R, ApiError> {
+	// 	let args_raw = encode_args(args).expect("Failed to encode arguments.");
+	// 	let fut = call_raw(data.canister, &data.method, args_raw, 0).await;
+
+	// 	match fut {
+	// 		Ok(bytes) => {
+	// 			let decoded = decode_args::<R>(&bytes);
+
+	// 			match decoded {
+	// 				Ok(response) => Ok(response),
+	// 				Err(err) => Err(ApiError::InterCanister(err.to_string())),
+	// 			}
+	// 		}
+	// 		Err(_) => {
+	// 			return Err(ApiError::InterCanister("Failed to encode bytes".to_string()));
+	// 		}
+	// 	}
+	// }
 }

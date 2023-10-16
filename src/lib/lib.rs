@@ -13,6 +13,7 @@ pub mod types {
 	pub mod node_type_mapper;
 	pub mod node_pin;
 	pub mod headers;
+	pub mod tuple_variant;
 }
 
 pub mod utils;
