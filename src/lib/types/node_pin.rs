@@ -14,7 +14,7 @@ pub enum PinType {
 	/// You can use this Pin to apply JS logic to the data within a Node prior starting the Node.
 	PrePin(CustomPinLogic),
 	/// You can use this Pin to apply JS logic to the data within a Node after the Node has finished.
-	PostResponsePin(CustomPinLogic),
+	PostPin(CustomPinLogic),
 	/// You can use this Pin map data within a Node to a different format
 	MapperPin(Mapper),
 	/// You can use this Pin to filter the Node from being executed

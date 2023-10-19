@@ -3,6 +3,7 @@ use serde::Deserialize;
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum TupleVariant<T> {
+	Zero,
 	One(T),
 	Two(T, T),
 	Three(T, T, T),

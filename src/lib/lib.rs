@@ -19,3 +19,4 @@ pub mod types {
 pub mod utils;
 pub mod save_candid;
 pub mod whitelist;
+pub mod conversion;

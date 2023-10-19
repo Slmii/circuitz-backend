@@ -17,6 +17,21 @@ thread_local! {
 }
 
 impl CircuitsStore {
+	/// Get all circuits.
+	///
+	/// # Returns
+	/// - `Vec<Circuit>` - Circuits
+	pub fn get_circuits() -> Vec<Circuit> {
+		CIRCUITS.with(|circuits| {
+			let circuits = circuits.borrow();
+
+			circuits
+				.iter()
+				.map(|(_, circuit)| circuit.clone())
+				.collect::<Vec<Circuit>>()
+		})
+	}
+
 	/// Get circuit by id.
 	///
 	/// # Arguments

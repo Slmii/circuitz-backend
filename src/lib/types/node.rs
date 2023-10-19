@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use candid::{ CandidType, Principal, Decode, Encode };
+use candid::{ CandidType, types::principal::Principal, Decode, Encode };
 use ic_stable_structures::{ storable::Bound, Storable };
 use serde::Deserialize;
 

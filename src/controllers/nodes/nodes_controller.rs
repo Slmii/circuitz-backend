@@ -1,4 +1,4 @@
-use candid::Principal;
+use candid::types::principal::Principal;
 use ic_cdk::caller;
 use ic_cdk_macros::{ query, update };
 use lib::{
@@ -33,7 +33,7 @@ fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
 }
 
 #[update]
-async fn preview_lookup_request(data: LookupCanister) -> Result<Vec<u8>, ApiError> {
+async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(_) => NodesStore::preview_lookup_request(data).await,
 		Err(err) => Err(err),

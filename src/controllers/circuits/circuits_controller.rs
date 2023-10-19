@@ -13,6 +13,11 @@ fn get_circuit(circuit_id: u32) -> Result<Circuit, ApiError> {
 }
 
 #[query]
+fn get_circuits() -> Vec<Circuit> {
+	CircuitsStore::get_circuits()
+}
+
+#[query]
 fn get_user_circuits() -> Result<Vec<Circuit>, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => Ok(CircuitsStore::get_user_circuits(caller_principal)),

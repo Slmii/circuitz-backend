@@ -1,4 +1,4 @@
-use candid::{ Principal, encode_args };
+use candid::{ Principal, ser::IDLBuilder, IDLArgs, IDLValue, Decode, parser::types::IDLType, IDLProg };
 use ic_cdk::{ id, api::{ time, call::call_raw } };
 use ic_stable_structures::{
 	memory_manager::{ MemoryManager, MemoryId },
@@ -6,12 +6,15 @@ use ic_stable_structures::{
 	StableCell,
 	StableBTreeMap,
 };
-use lib::types::{
-	node::{ Node, NodeType },
-	api_error::ApiError,
-	memory::Memory,
-	node_type_lookup::{ LookupCanister, Arg },
-	tuple_variant::TupleVariant,
+use lib::{
+	types::{
+		node::{ Node, NodeType },
+		api_error::ApiError,
+		memory::Memory,
+		node_type_lookup::{ LookupCanister, Arg },
+		tuple_variant::TupleVariant,
+	},
+	conversion::{ Idl2JsonOptions, idl2json_with_weak_names, idl_prog, idl2json },
 };
 use std::cell::RefCell;
 
@@ -157,28 +160,100 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Unknown` - Unknown data from the canister
-	pub async fn preview_lookup_request(data: LookupCanister) -> Result<Vec<u8>, ApiError> {
+	pub async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
 		let to_tuple = Self::vec_to_tuple(data.args);
 
 		match to_tuple {
 			Ok(tuple) => {
 				match tuple {
+					TupleVariant::Zero => {
+						let bytes = IDLBuilder::new().serialize_to_vec().unwrap();
+
+						let response = call_raw(data.canister, &data.method, bytes, 0).await.unwrap();
+						let decoded = IDLArgs::from_bytes(&response).unwrap();
+						let output = decoded.to_string();
+
+						Ok(output)
+					}
 					TupleVariant::One(variant) => {
 						match variant {
 							Arg::Number(number) => {
-								let args_raw = encode_args((number,)).unwrap();
-								let response = call_raw(data.canister, &data.method, args_raw, 0).await;
+								let bytes = IDLBuilder::new()
+									.value_arg(&IDLValue::Nat32(number))
+									.unwrap()
+									.serialize_to_vec()
+									.unwrap();
 
-								// let response: Result<(String,), (RejectionCode, String)> = call::call(
-								// 	data.canister,
-								// 	&data.method,
-								// 	(number,)
-								// ).await;
+								// let mut env = TypeEnv::new();
+								// let metadata: Vec<u8> = ic_agent::agent::Agent
+								// 	::read_state_canister_metadata(
+								// 		&AgentBuilder::default().build().unwrap(),
+								// 		data.canister,
+								// 		&"candid:service".to_string()
+								// 	).await
+								// 	.unwrap();
 
-								match response {
-									Ok(bytes) => Ok(bytes),
-									Err((_, message)) => Err(ApiError::InterCanister(message)),
-								}
+								// let prog = IDLProg::from_str(&metadata).expect("Failed to parse did");
+
+								// let idl_type = polyfill::idl_prog
+								// 	::get_type(&prog, "candid:service")
+								// 	.expect("Failed to get idltype");
+								// let idl_type = IDLType::OptT(Box::new(idl_type));
+
+								let encoded = call_raw(data.canister, &data.method, bytes, 0).await.unwrap();
+								let idl_value = Decode!(&encoded[..], IDLValue).expect("Failed to decode IDLValue");
+
+								let idl_json = idl2json(&idl_value, &Idl2JsonOptions::default());
+
+								let idl_str =
+									r#"
+									type ApiError = variant {
+										NotFound : text;
+										Unauthorized : text;
+										AlreadyExists : text;
+										InterCanister : text;
+									};
+									type Circuit = record {
+										id : nat32;
+										updated_at : nat64;
+										run_at : opt nat64;
+										name : text;
+										is_enabled : bool;
+										description : opt text;
+										created_at : nat64;
+										user_id : principal;
+										is_favorite : bool;
+										node_canister_id : principal;
+										is_running : bool;
+									};
+									type PostCircuit = record { name : text; description : opt text };
+									type Result = variant { Ok : Circuit; Err : ApiError };
+									type Result_1 = variant { Ok : principal; Err : ApiError };
+									type Result_2 = variant { Ok : vec Circuit; Err : ApiError };
+									service : {
+										add_circuit : (PostCircuit) -> (Result);
+										disable_circuit : (nat32) -> (Result);
+										edit_circuit : (nat32, PostCircuit) -> (Result);
+										enable_circuit : (nat32) -> (Result);
+										get_circuit : (nat32) -> (Result) query;
+										get_circuits : () -> (vec Circuit) query;
+										get_node_canister_id : (nat32) -> (Result_1) query;
+										get_user_circuits : () -> (Result_2) query;
+									}
+								"#;
+
+								let prog = idl_str.parse().expect("Failed to parse did");
+								let idl_type = idl_prog::get_type(&prog, "Circuit").expect("Failed to get idltype");
+								let idl_type = IDLType::OptT(Box::new(idl_type));
+								let idl_json_weak_names = idl2json_with_weak_names(
+									&idl_value,
+									&idl_type,
+									&Idl2JsonOptions::default()
+								);
+								// // let json_string = serde_json::to_string(&idl_json).unwrap();
+								let json_string = serde_json::to_string(&idl_json_weak_names).unwrap();
+
+								Ok(json_string)
 							}
 							_ => {
 								return Err(ApiError::InterCanister("Failed to convert to tuple".to_string()));
@@ -196,101 +271,13 @@ impl NodesStore {
 
 	fn vec_to_tuple<T: Clone>(v: Vec<T>) -> Result<TupleVariant<T>, &'static str> {
 		match v.len() {
-			0 => Err("Vec is empty"),
+			0 => Ok(TupleVariant::Zero),
 			1 => Ok(TupleVariant::One(v[0].clone())),
 			2 => Ok(TupleVariant::Two(v[0].clone(), v[1].clone())),
 			3 => Ok(TupleVariant::Three(v[0].clone(), v[1].clone(), v[2].clone())),
 			4 => Ok(TupleVariant::Four(v[0].clone(), v[1].clone(), v[2].clone(), v[3].clone())),
 			5 => Ok(TupleVariant::Five(v[0].clone(), v[1].clone(), v[2].clone(), v[3].clone(), v[4].clone())),
-			6 =>
-				Ok(
-					TupleVariant::Six(
-						v[0].clone(),
-						v[1].clone(),
-						v[2].clone(),
-						v[3].clone(),
-						v[4].clone(),
-						v[5].clone()
-					)
-				),
-			7 =>
-				Ok(
-					TupleVariant::Seven(
-						v[0].clone(),
-						v[1].clone(),
-						v[2].clone(),
-						v[3].clone(),
-						v[4].clone(),
-						v[5].clone(),
-						v[6].clone()
-					)
-				),
-			8 =>
-				Ok(
-					TupleVariant::Eight(
-						v[0].clone(),
-						v[1].clone(),
-						v[2].clone(),
-						v[3].clone(),
-						v[4].clone(),
-						v[5].clone(),
-						v[6].clone(),
-						v[7].clone()
-					)
-				),
-			9 =>
-				Ok(
-					TupleVariant::Nine(
-						v[0].clone(),
-						v[1].clone(),
-						v[2].clone(),
-						v[3].clone(),
-						v[4].clone(),
-						v[5].clone(),
-						v[6].clone(),
-						v[7].clone(),
-						v[8].clone()
-					)
-				),
-			10 =>
-				Ok(
-					TupleVariant::Ten(
-						v[0].clone(),
-						v[1].clone(),
-						v[2].clone(),
-						v[3].clone(),
-						v[4].clone(),
-						v[5].clone(),
-						v[6].clone(),
-						v[7].clone(),
-						v[8].clone(),
-						v[9].clone()
-					)
-				),
-			// You can continue this pattern for as many sizes as you wish to handle
 			_ => Err("Vec is too large to convert to a known tuple size"),
 		}
 	}
-
-	// pub async fn preview_lookup_request<T: ArgumentEncoder, R: for<'a> ArgumentDecoder<'a>>(
-	// 	data: LookupCanister,
-	// 	args: T
-	// ) -> Result<R, ApiError> {
-	// 	let args_raw = encode_args(args).expect("Failed to encode arguments.");
-	// 	let fut = call_raw(data.canister, &data.method, args_raw, 0).await;
-
-	// 	match fut {
-	// 		Ok(bytes) => {
-	// 			let decoded = decode_args::<R>(&bytes);
-
-	// 			match decoded {
-	// 				Ok(response) => Ok(response),
-	// 				Err(err) => Err(ApiError::InterCanister(err.to_string())),
-	// 			}
-	// 		}
-	// 		Err(_) => {
-	// 			return Err(ApiError::InterCanister("Failed to encode bytes".to_string()));
-	// 		}
-	// 	}
-	// }
 }
