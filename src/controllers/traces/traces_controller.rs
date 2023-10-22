@@ -1,6 +1,6 @@
 use ic_cdk::caller;
 use ic_cdk_macros::query;
-use lib::{ types::{ trace::Trace, api_error::ApiError }, utils::validate_anonymous };
+use lib::{ types::{ trace::Trace, api_error::ApiError }, utils::validate::validate_anonymous };
 use crate::traces_store::TracesStore;
 
 #[query]

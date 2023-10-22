@@ -1,16 +1,8 @@
-use std::borrow::Cow;
+use std::{ borrow::Cow, collections::HashMap };
 use candid::{ CandidType, types::principal::Principal, Decode, Encode };
 use ic_stable_structures::{ storable::Bound, Storable };
-use serde::Deserialize;
-
-use super::{
-	node_type_canister::Canister,
-	node_type_lookup::LookupCanister,
-	node_pin::Pin,
-	node_type_http_request::HttpRequest,
-	node_type_transformer::Transformer,
-	node_type_mapper::Mapper,
-};
+use serde::{ Deserialize, Serialize };
+use super::headers::Headers;
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct Node {
@@ -84,4 +76,151 @@ pub struct Output {
 	description: Option<String>,
 	canister: Principal,
 	method: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Transformer {
+	pub input: String,
+	pub output: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Mapper {
+	input: String,
+	output: String,
+	// Either upload an IDL and read the fields or make a 'sample' request and read the fields
+	interface: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct LookupCanister {
+	pub name: String,
+	pub description: Option<String>,
+	pub canister: Principal,
+	pub method: String,
+	pub args: Vec<Arg>,
+	pub cycles: u128,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct LookupHttpRequest {
+	pub name: String,
+	pub description: Option<String>,
+	pub url: String,
+	pub headers: Headers,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Arg {
+	String(String),
+	Number(u32),
+	Principal(Principal),
+	BigInt(u64),
+	Boolean(bool),
+	Array(Vec<Arg>),
+	Object(HashMap<String, Arg>),
+	Field(String),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct HttpRequest {
+	name: String,
+	description: Option<String>,
+	url: String,
+	method: HttpRequestMethod,
+	// Store header name and value
+	headers: Headers,
+	request_body: Option<String>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum HttpRequestMethod {
+	GET,
+	POST,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Canister {
+	name: String,
+	verification_type: VerificationType,
+	description: Option<String>,
+	sample_data: Option<String>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum VerificationType {
+	None,
+	Token(Token),
+	Whitelist(Vec<Principal>),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Token {
+	token: String,
+	field: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Pin {
+	pin_type: PinType,
+	order: u32,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum PinType {
+	/// You can use this Pin to apply JS logic to the data within a Node prior starting the Node.
+	PrePin(CustomPinLogic),
+	/// You can use this Pin to apply JS logic to the data within a Node after the Node has finished.
+	PostPin(CustomPinLogic),
+	/// You can use this Pin map data within a Node to a different format
+	MapperPin(Mapper),
+	/// You can use this Pin to filter the Node from being executed
+	FilterPin(Vec<ConditionGroup>),
+	/// You can use this Pin to transform the data within a Node after a Node request.
+	LookupTransformPin(LookupTransformPin),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct CustomPinLogic {
+	function: Option<String>,
+	script: Option<String>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct ConditionGroup {
+	condition: Condition,
+	condition_group_type: Option<ConditionGroupType>,
+	field: String,
+	operator: Operator,
+	value: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum Condition {
+	Not,
+	Is,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum ConditionGroupType {
+	And,
+	Or,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum Operator {
+	Equal,
+	NotEqual,
+	GreaterThan,
+	LessThan,
+	GreaterThanOrEqual,
+	LessThanOrEqual,
+	In,
+	NotIn,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct LookupTransformPin {
+	input: String,
+	output: String,
 }

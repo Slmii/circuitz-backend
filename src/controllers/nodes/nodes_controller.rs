@@ -1,11 +1,10 @@
 use candid::types::principal::Principal;
-use ic_cdk::caller;
+use ic_cdk::{ caller, api::management_canister::http_request::{ TransformArgs, HttpResponse, HttpHeader } };
 use ic_cdk_macros::{ query, update };
 use lib::{
-	types::{ node::{ Node, NodeType }, api_error::ApiError, node_type_lookup::LookupCanister },
-	utils::validate_anonymous,
+	types::{ node::{ Node, NodeType, LookupCanister }, api_error::ApiError },
+	utils::validate::validate_anonymous,
 };
-// use serde_json::Value;
 use crate::nodes_store::NodesStore;
 
 #[query]
@@ -14,6 +13,50 @@ fn get_circuit_nodes(circuit_id: u32) -> Result<(Principal, Vec<Node>), ApiError
 		Ok(caller_principal) => NodesStore::get_circuit_nodes(circuit_id, caller_principal),
 		Err(err) => Err(err),
 	}
+}
+
+#[query]
+fn transform(raw: TransformArgs) -> HttpResponse {
+	let headers = vec![
+		HttpHeader {
+			name: "Content-Security-Policy".to_string(),
+			value: "default-src 'self'".to_string(),
+		},
+		HttpHeader {
+			name: "Referrer-Policy".to_string(),
+			value: "strict-origin".to_string(),
+		},
+		HttpHeader {
+			name: "Permissions-Policy".to_string(),
+			value: "geolocation=(self)".to_string(),
+		},
+		HttpHeader {
+			name: "Strict-Transport-Security".to_string(),
+			value: "max-age=63072000".to_string(),
+		},
+		HttpHeader {
+			name: "X-Frame-Options".to_string(),
+			value: "DENY".to_string(),
+		},
+		HttpHeader {
+			name: "X-Content-Type-Options".to_string(),
+			value: "nosniff".to_string(),
+		}
+	];
+
+	let mut res = HttpResponse {
+		status: raw.response.status.clone(),
+		body: raw.response.body.clone(),
+		headers,
+		..Default::default()
+	};
+
+	if res.status == 200 {
+		res.body = raw.response.body;
+	} else {
+		ic_cdk::api::print(format!("Received an error from coinbase: err = {:?}", raw));
+	}
+	res
 }
 
 #[update]
@@ -34,10 +77,7 @@ fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
 
 #[update]
 async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
-	match validate_anonymous(&caller()) {
-		Ok(_) => NodesStore::preview_lookup_request(data).await,
-		Err(err) => Err(err),
-	}
+	NodesStore::preview_lookup_request(data).await
 }
 
 // #[query]

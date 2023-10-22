@@ -1,7 +1,7 @@
 use crate::users_store::UsersStore;
 use ic_cdk::caller;
 use ic_cdk_macros::{ query, update };
-use lib::{ types::{ api_error::ApiError, user::User }, utils::{ validate_anonymous, validate_admin } };
+use lib::{ types::{ api_error::ApiError, user::User }, utils::validate::{ validate_anonymous, validate_admin } };
 
 #[query]
 fn get_users() -> Result<Vec<User>, ApiError> {

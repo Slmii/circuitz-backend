@@ -1,7 +1,7 @@
 use candid::Principal;
 use ic_cdk::caller;
 use ic_cdk_macros::{ query, update };
-use lib::{ types::{ circuit::{ Circuit, PostCircuit }, api_error::ApiError }, utils::validate_anonymous };
+use lib::{ types::{ circuit::{ Circuit, PostCircuit }, api_error::ApiError }, utils::validate::validate_anonymous };
 use crate::circuits_store::CircuitsStore;
 
 #[query]

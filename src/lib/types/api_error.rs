@@ -1,7 +1,7 @@
 use candid::Deserialize;
 use candid::CandidType;
 
-#[derive(CandidType, Clone, Deserialize)]
+#[derive(CandidType, Debug, Clone, Deserialize)]
 pub enum ApiError {
 	Unauthorized(String),
 	NotFound(String),

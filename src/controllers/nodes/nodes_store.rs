@@ -1,5 +1,19 @@
-use candid::{ Principal, ser::IDLBuilder, IDLArgs, IDLValue, Decode, parser::types::IDLType, IDLProg };
-use ic_cdk::{ id, api::{ time, call::call_raw } };
+use candid::Principal;
+use ic_cdk::{
+	api::{
+		management_canister::http_request::{
+			http_request,
+			CanisterHttpRequestArgument,
+			HttpHeader,
+			HttpMethod,
+			TransformContext,
+			TransformFunc,
+		},
+		time,
+	},
+	id,
+};
+
 use ic_stable_structures::{
 	memory_manager::{ MemoryManager, MemoryId },
 	DefaultMemoryImpl,
@@ -7,14 +21,8 @@ use ic_stable_structures::{
 	StableBTreeMap,
 };
 use lib::{
-	types::{
-		node::{ Node, NodeType },
-		api_error::ApiError,
-		memory::Memory,
-		node_type_lookup::{ LookupCanister, Arg },
-		tuple_variant::TupleVariant,
-	},
-	conversion::{ Idl2JsonOptions, idl2json_with_weak_names, idl_prog, idl2json },
+	types::{ node::{ Node, NodeType, LookupCanister }, memory::Memory, api_error::ApiError },
+	utils::idempotency::generate_idempotency_key,
 };
 use std::cell::RefCell;
 
@@ -161,123 +169,84 @@ impl NodesStore {
 	/// # Returns
 	/// - `Unknown` - Unknown data from the canister
 	pub async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
-		let to_tuple = Self::vec_to_tuple(data.args);
+		// Setup the URL
+		let host = "circuitz-node-modlx.ondigitalocean.app";
+		let url = "https://circuitz-node-modlx.ondigitalocean.app/icc";
 
-		match to_tuple {
-			Ok(tuple) => {
-				match tuple {
-					TupleVariant::Zero => {
-						let bytes = IDLBuilder::new().serialize_to_vec().unwrap();
-
-						let response = call_raw(data.canister, &data.method, bytes, 0).await.unwrap();
-						let decoded = IDLArgs::from_bytes(&response).unwrap();
-						let output = decoded.to_string();
-
-						Ok(output)
-					}
-					TupleVariant::One(variant) => {
-						match variant {
-							Arg::Number(number) => {
-								let bytes = IDLBuilder::new()
-									.value_arg(&IDLValue::Nat32(number))
-									.unwrap()
-									.serialize_to_vec()
-									.unwrap();
-
-								// let mut env = TypeEnv::new();
-								// let metadata: Vec<u8> = ic_agent::agent::Agent
-								// 	::read_state_canister_metadata(
-								// 		&AgentBuilder::default().build().unwrap(),
-								// 		data.canister,
-								// 		&"candid:service".to_string()
-								// 	).await
-								// 	.unwrap();
-
-								// let prog = IDLProg::from_str(&metadata).expect("Failed to parse did");
-
-								// let idl_type = polyfill::idl_prog
-								// 	::get_type(&prog, "candid:service")
-								// 	.expect("Failed to get idltype");
-								// let idl_type = IDLType::OptT(Box::new(idl_type));
-
-								let encoded = call_raw(data.canister, &data.method, bytes, 0).await.unwrap();
-								let idl_value = Decode!(&encoded[..], IDLValue).expect("Failed to decode IDLValue");
-
-								let idl_json = idl2json(&idl_value, &Idl2JsonOptions::default());
-
-								let idl_str =
-									r#"
-									type ApiError = variant {
-										NotFound : text;
-										Unauthorized : text;
-										AlreadyExists : text;
-										InterCanister : text;
-									};
-									type Circuit = record {
-										id : nat32;
-										updated_at : nat64;
-										run_at : opt nat64;
-										name : text;
-										is_enabled : bool;
-										description : opt text;
-										created_at : nat64;
-										user_id : principal;
-										is_favorite : bool;
-										node_canister_id : principal;
-										is_running : bool;
-									};
-									type PostCircuit = record { name : text; description : opt text };
-									type Result = variant { Ok : Circuit; Err : ApiError };
-									type Result_1 = variant { Ok : principal; Err : ApiError };
-									type Result_2 = variant { Ok : vec Circuit; Err : ApiError };
-									service : {
-										add_circuit : (PostCircuit) -> (Result);
-										disable_circuit : (nat32) -> (Result);
-										edit_circuit : (nat32, PostCircuit) -> (Result);
-										enable_circuit : (nat32) -> (Result);
-										get_circuit : (nat32) -> (Result) query;
-										get_circuits : () -> (vec Circuit) query;
-										get_node_canister_id : (nat32) -> (Result_1) query;
-										get_user_circuits : () -> (Result_2) query;
-									}
-								"#;
-
-								let prog = idl_str.parse().expect("Failed to parse did");
-								let idl_type = idl_prog::get_type(&prog, "Circuit").expect("Failed to get idltype");
-								let idl_type = IDLType::OptT(Box::new(idl_type));
-								let idl_json_weak_names = idl2json_with_weak_names(
-									&idl_value,
-									&idl_type,
-									&Idl2JsonOptions::default()
-								);
-								// // let json_string = serde_json::to_string(&idl_json).unwrap();
-								let json_string = serde_json::to_string(&idl_json_weak_names).unwrap();
-
-								Ok(json_string)
-							}
-							_ => {
-								return Err(ApiError::InterCanister("Failed to convert to tuple".to_string()));
-							}
-						}
-					}
-					_ => {
-						return Err(ApiError::InterCanister("Failed to convert to tuple".to_string()));
-					}
-				}
+		// Prepare headers for the system http_request call
+		let request_headers = vec![
+			HttpHeader {
+				name: "Host".to_string(),
+				value: format!("{host}:443"),
+			},
+			HttpHeader {
+				name: "User-Agent".to_string(),
+				value: "demo_HTTP_POST_canister".to_string(),
+			},
+			//For the purposes of this exercise, Idempotency-Key" is hard coded, but in practice
+			//it should be generated via code and unique to each POST request. Common to create helper methods for this
+			HttpHeader {
+				name: "Idempotency-Key".to_string(),
+				value: generate_idempotency_key().await.unwrap(),
+			},
+			HttpHeader {
+				name: "Content-Type".to_string(),
+				value: "application/json".to_string(),
 			}
-			Err(_) => Err(ApiError::InterCanister("Failed to convert to tuple".to_string())),
-		}
-	}
+		];
 
-	fn vec_to_tuple<T: Clone>(v: Vec<T>) -> Result<TupleVariant<T>, &'static str> {
-		match v.len() {
-			0 => Ok(TupleVariant::Zero),
-			1 => Ok(TupleVariant::One(v[0].clone())),
-			2 => Ok(TupleVariant::Two(v[0].clone(), v[1].clone())),
-			3 => Ok(TupleVariant::Three(v[0].clone(), v[1].clone(), v[2].clone())),
-			4 => Ok(TupleVariant::Four(v[0].clone(), v[1].clone(), v[2].clone(), v[3].clone())),
-			5 => Ok(TupleVariant::Five(v[0].clone(), v[1].clone(), v[2].clone(), v[3].clone(), v[4].clone())),
-			_ => Err("Vec is too large to convert to a known tuple size"),
+		let request_body_value =
+			serde_json::json!({
+			"canisterId": data.canister,
+			"methodName": data.method,
+			"args": data.args,
+		});
+		let request_body: Option<Vec<u8>> = Some(request_body_value.to_string().into_bytes());
+
+		let request = CanisterHttpRequestArgument {
+			url: url.to_string(),
+			max_response_bytes: None, //optional for request
+			method: HttpMethod::POST,
+			headers: request_headers,
+			body: request_body,
+			transform: Some(TransformContext {
+				function: TransformFunc(candid::Func {
+					method: "transform".into(),
+					principal: ic_cdk::id(),
+				}),
+				context: vec![],
+			}),
+		};
+
+		match http_request(request, data.cycles).await {
+			Ok((response,)) => {
+				// if successful, `HttpResponse` has this structure:
+				// pub struct HttpResponse {
+				//     pub status: Nat,
+				//     pub headers: Vec<HttpHeader>,
+				//     pub body: Vec<u8>,
+				// }
+
+				// We need to decode that Vec<u8> that is the body into readable text.
+				// To do this, we:
+				//  1. Call `String::from_utf8()` on response.body
+				//  3. We use a switch to explicitly call out both cases of decoding the Blob into ?Text
+				let str_body = String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.");
+
+				// The API response will looks like this:
+				// { successful: true }
+
+				// Return the body as a string and end the method
+				let result: String = format!("{}. See more info of the request sent at: {}/inspect", str_body, url);
+
+				return Ok(result);
+			}
+			Err((r, m)) => {
+				let message = format!("The http_request resulted into error. RejectionCode: {r:?}, Error: {m}");
+
+				//Return the error as a string and end the method
+				return Err(ApiError::InterCanister(message));
+			}
 		}
 	}
 }
