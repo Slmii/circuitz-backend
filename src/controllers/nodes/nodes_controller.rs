@@ -54,7 +54,7 @@ fn transform(raw: TransformArgs) -> HttpResponse {
 	if res.status == 200 {
 		res.body = raw.response.body;
 	} else {
-		ic_cdk::api::print(format!("Received an error from coinbase: err = {:?}", raw));
+		ic_cdk::api::print(format!("Received an error: err = {:?}", raw));
 	}
 	res
 }
@@ -77,7 +77,10 @@ fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
 
 #[update]
 async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
-	NodesStore::preview_lookup_request(data).await
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::preview_lookup_request(data, caller_principal).await,
+		Err(err) => Err(err),
+	}
 }
 
 // #[query]

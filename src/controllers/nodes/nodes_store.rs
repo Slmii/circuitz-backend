@@ -168,7 +168,15 @@ impl NodesStore {
 	///
 	/// # Returns
 	/// - `Unknown` - Unknown data from the canister
-	pub async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
+	pub async fn preview_lookup_request(
+		data: LookupCanister,
+		_caller_principal: Principal
+	) -> Result<String, ApiError> {
+		// if caller_principal.to_string() != canister_owner {
+		// 	// If the caller is not the canister owner, return an error
+		// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+		// }
+
 		// Setup the URL
 		let host = "circuitz-node-modlx.ondigitalocean.app";
 		let url = "https://circuitz-node-modlx.ondigitalocean.app/icc";
