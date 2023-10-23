@@ -241,13 +241,7 @@ impl NodesStore {
 				//  3. We use a switch to explicitly call out both cases of decoding the Blob into ?Text
 				let str_body = String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.");
 
-				// The API response will looks like this:
-				// { successful: true }
-
-				// Return the body as a string and end the method
-				let result: String = format!("{}. See more info of the request sent at: {}/inspect", str_body, url);
-
-				return Ok(result);
+				return Ok(str_body);
 			}
 			Err((r, m)) => {
 				let message = format!("The http_request resulted into error. RejectionCode: {r:?}, Error: {m}");
