@@ -14,7 +14,7 @@ pub async fn generate_idempotency_key() -> Result<String, ApiError> {
 					.collect::<String>()
 			);
 
-			Ok(format!("UUID-{}", random_string))
+			Ok(random_string)
 		}
 		Err(_) => Err(ApiError::InterCanister("Failed to generate random number".to_string())),
 	}
