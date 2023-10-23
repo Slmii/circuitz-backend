@@ -60,6 +60,14 @@ fn transform(raw: TransformArgs) -> HttpResponse {
 }
 
 #[update]
+fn delete_node(node_id: u32) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::delete_node(node_id, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
 fn add_node(circuit_id: u32, data: NodeType) -> Result<Node, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::add_node(circuit_id, data, caller_principal),

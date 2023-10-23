@@ -12,6 +12,7 @@ fn get_circuit(circuit_id: u32) -> Result<Circuit, ApiError> {
 	}
 }
 
+// TODO: remove when going live
 #[query]
 fn get_circuits() -> Vec<Circuit> {
 	CircuitsStore::get_circuits()
