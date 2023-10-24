@@ -175,7 +175,7 @@ pub enum PinType {
 	/// You can use this Pin map data within a Node to a different format
 	MapperPin(Mapper),
 	/// You can use this Pin to filter the Node from being executed
-	FilterPin(Vec<ConditionGroup>),
+	FilterPin(FilterPin),
 	/// You can use this Pin to transform the data within a Node after a Node request.
 	LookupTransformPin(LookupTransformPin),
 }
@@ -187,12 +187,18 @@ pub struct CustomPinLogic {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct ConditionGroup {
+pub struct FilterPin {
+	rules: Vec<Rules>,
 	condition: Condition,
-	condition_group_type: Option<ConditionGroupType>,
+	condition_group: Option<ConditionGroup>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Rules {
 	field: String,
 	operator: Operator,
 	value: String,
+	operand: Operand,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -202,7 +208,7 @@ pub enum Condition {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum ConditionGroupType {
+pub enum ConditionGroup {
 	And,
 	Or,
 }
@@ -215,8 +221,28 @@ pub enum Operator {
 	LessThan,
 	GreaterThanOrEqual,
 	LessThanOrEqual,
-	In,
-	NotIn,
+	Contains,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Operand {
+	operand_type: OperandType,
+	date_type: DataType,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum OperandType {
+	Value,
+	Field,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub enum DataType {
+	String,
+	Number,
+	Principal,
+	BigInt,
+	Boolean,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
