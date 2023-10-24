@@ -188,13 +188,13 @@ pub struct CustomPinLogic {
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct FilterPin {
-	rules: Vec<Rules>,
+	rules: Vec<Rule>,
 	condition: Condition,
 	condition_group: Option<ConditionGroup>,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Rules {
+pub struct Rule {
 	field: String,
 	operator: Operator,
 	value: String,
@@ -227,7 +227,7 @@ pub enum Operator {
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Operand {
 	operand_type: OperandType,
-	date_type: DataType,
+	data_type: DataType,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
