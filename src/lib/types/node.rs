@@ -42,9 +42,11 @@ impl Default for Node {
 			is_enabled: Default::default(),
 			is_error: Default::default(),
 			is_running: Default::default(),
-			node_type: NodeType::Transformer(Transformer {
-				input: Default::default(),
-				output: Default::default(),
+			node_type: NodeType::Canister(Canister {
+				description: Default::default(),
+				name: Default::default(),
+				sample_data: Default::default(),
+				verification_type: VerificationType::None,
 			}),
 			pin: Default::default(),
 			created_at: Default::default(),
@@ -59,10 +61,6 @@ pub enum NodeType {
 	Canister(Canister),
 	HttpRequest(HttpRequest),
 
-	/// Define a transformation rule to and fields to the response data returned by the previous Node, while keeping all other fields
-	Transformer(Transformer),
-	/// Define one or more mappings to transform the data returned by the Node to different specified fields.
-	Mapper(Mapper),
 	Output(Output),
 
 	/// Define a lookup request to retrieve data from a different endpoint.
