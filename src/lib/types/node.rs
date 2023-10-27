@@ -176,6 +176,8 @@ pub enum PinType {
 	FilterPin(FilterPin),
 	/// You can use this Pin to transform the data within a Node after a Node request.
 	LookupTransformPin(LookupTransformPin),
+	/// You can use this Pin to specify which data returned by the LookUp get merged into the Node.
+	LookupFilterPin(FilterPin),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
