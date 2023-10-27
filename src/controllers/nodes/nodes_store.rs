@@ -196,6 +196,83 @@ impl NodesStore {
 		})
 	}
 
+	/// Edit a node's order.
+	///
+	/// # Arguments
+	/// - `node_id` - Node ID
+	/// - `order` - Node order
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Node` - Node
+	pub fn edit_order(node_id: u32, order: u32, _caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let mut nodes = nodes.borrow_mut();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			let node = nodes.get(&node_id);
+
+			if node.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			let mut node = node.unwrap().clone();
+
+			// Mutate values
+			node.order = order;
+			node.updated_at = time();
+
+			// Add new node or overwrite existing one
+			nodes.insert(node_id, node.clone());
+
+			Ok(node)
+		})
+	}
+
+	/// Toggle enable/disable node.
+	///
+	/// # Arguments
+	/// - `node_id` - Circuit ID
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Node` - Enabled node
+	pub fn toggle_node(node_id: u32, enabled: bool, _caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let mut nodes = nodes.borrow_mut();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			let node = nodes.get(&node_id);
+
+			if node.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			let mut node = node.unwrap().clone();
+
+			// Mutate values
+			node.is_enabled = enabled;
+			node.updated_at = time();
+
+			// Add new node or overwrite existing one
+			nodes.insert(node_id, node.clone());
+
+			Ok(node)
+		})
+	}
+
 	/// Preview lookup canister request
 	///
 	/// # Arguments

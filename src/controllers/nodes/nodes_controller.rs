@@ -84,6 +84,30 @@ fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
 }
 
 #[update]
+fn edit_order(node_id: u32, order: u32) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::edit_order(node_id, order, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+fn enable_node(node_id: u32) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::toggle_node(node_id, true, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+fn disable_node(node_id: u32) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::toggle_node(node_id, false, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
 async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::preview_lookup_request(data, caller_principal).await,
