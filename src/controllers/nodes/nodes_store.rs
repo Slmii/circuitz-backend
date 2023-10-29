@@ -13,7 +13,6 @@ use ic_cdk::{
 	},
 	id,
 };
-
 use ic_stable_structures::{
 	memory_manager::{ MemoryManager, MemoryId },
 	DefaultMemoryImpl,
@@ -21,7 +20,7 @@ use ic_stable_structures::{
 	StableBTreeMap,
 };
 use lib::{
-	types::{ node::{ Node, NodeType, LookupCanister }, memory::Memory, api_error::ApiError },
+	types::{ node::{ Node, Pin, NodeType, LookupCanister }, memory::Memory, api_error::ApiError },
 	utils::idempotency::generate_idempotency_key,
 };
 use std::cell::RefCell;
@@ -100,7 +99,6 @@ impl NodesStore {
 			// }
 
 			let node = nodes.get(&node_id);
-
 			if node.is_none() {
 				return Err(ApiError::NotFound("NOT FOUND".to_string()));
 			}
@@ -145,7 +143,7 @@ impl NodesStore {
 				is_running: false,
 				node_type: data,
 				order: node_id, // node_id is the order
-				pin: vec![],
+				pins: vec![],
 				created_at: time(),
 				updated_at: time(),
 			};
@@ -178,7 +176,6 @@ impl NodesStore {
 			// }
 
 			let node = nodes.get(&node_id);
-
 			if node.is_none() {
 				return Err(ApiError::NotFound("NOT FOUND".to_string()));
 			}
@@ -217,7 +214,6 @@ impl NodesStore {
 			// }
 
 			let node = nodes.get(&node_id);
-
 			if node.is_none() {
 				return Err(ApiError::NotFound("NOT FOUND".to_string()));
 			}
@@ -239,6 +235,7 @@ impl NodesStore {
 	///
 	/// # Arguments
 	/// - `node_id` - Circuit ID
+	/// - `enabled` - Enabled or disabled
 	/// - `caller_principal` - Principal of the caller
 	///
 	/// # Returns
@@ -255,7 +252,6 @@ impl NodesStore {
 			// }
 
 			let node = nodes.get(&node_id);
-
 			if node.is_none() {
 				return Err(ApiError::NotFound("NOT FOUND".to_string()));
 			}
@@ -265,6 +261,86 @@ impl NodesStore {
 			// Mutate values
 			node.is_enabled = enabled;
 			node.updated_at = time();
+
+			// Add new node or overwrite existing one
+			nodes.insert(node_id, node.clone());
+
+			Ok(node)
+		})
+	}
+
+	/// Add pin to node.
+	///
+	/// # Arguments
+	/// - `node_id` - Circuit ID
+	/// - `data` - Pin data
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Node` - Node
+	pub fn add_pin(node_id: u32, data: Pin, _caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let mut nodes = nodes.borrow_mut();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			let node = nodes.get(&node_id);
+			if node.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			let mut node = node.unwrap().clone();
+
+			// Mutate values
+			node.pins.push(data);
+
+			// Add new node or overwrite existing one
+			nodes.insert(node_id, node.clone());
+
+			Ok(node)
+		})
+	}
+
+	/// Edit pin of node.
+	///
+	/// # Arguments
+	/// - `node_id` - Circuit ID
+	/// - `data` - Pin data
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Node` - N
+	pub fn edit_pin(node_id: u32, data: Pin, _caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let mut nodes = nodes.borrow_mut();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			let node = nodes.get(&node_id);
+			if node.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			let mut node = node.unwrap().clone();
+
+			// Find pin by PinType
+			let pin_index = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
+			if pin_index.is_none() {
+				return Err(ApiError::NotFound("NOT FOUND".to_string()));
+			}
+
+			// Mutate values
+			node.pins[pin_index.unwrap()] = data;
 
 			// Add new node or overwrite existing one
 			nodes.insert(node_id, node.clone());

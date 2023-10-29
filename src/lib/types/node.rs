@@ -15,7 +15,7 @@ pub struct Node {
 	pub is_running: bool,
 	pub node_type: NodeType,
 	// AKA "hooks"
-	pub pin: Vec<Pin>,
+	pub pins: Vec<Pin>,
 	pub created_at: u64,
 	pub updated_at: u64,
 }
@@ -48,7 +48,7 @@ impl Default for Node {
 				sample_data: Default::default(),
 				verification_type: VerificationType::None,
 			}),
-			pin: Default::default(),
+			pins: Default::default(),
 			created_at: Default::default(),
 			updated_at: Default::default(),
 		}
@@ -160,8 +160,8 @@ pub struct Token {
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Pin {
-	pin_type: PinType,
-	order: u32,
+	pub pin_type: PinType,
+	pub order: u32,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]

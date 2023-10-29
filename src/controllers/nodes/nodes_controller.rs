@@ -2,7 +2,7 @@ use candid::types::principal::Principal;
 use ic_cdk::{ caller, api::management_canister::http_request::{ TransformArgs, HttpResponse, HttpHeader } };
 use ic_cdk_macros::{ query, update };
 use lib::{
-	types::{ node::{ Node, NodeType, LookupCanister }, api_error::ApiError },
+	types::{ node::{ Node, Pin, NodeType, LookupCanister }, api_error::ApiError },
 	utils::validate::validate_anonymous,
 };
 use crate::nodes_store::NodesStore;
@@ -87,6 +87,22 @@ fn edit_node(node_id: u32, data: NodeType) -> Result<Node, ApiError> {
 fn edit_order(node_id: u32, order: u32) -> Result<Node, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::edit_order(node_id, order, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+fn add_pin(node_id: u32, data: Pin) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::add_pin(node_id, data, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+fn edit_pin(node_id: u32, data: Pin) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::edit_pin(node_id, data, caller_principal),
 		Err(err) => Err(err),
 	}
 }
