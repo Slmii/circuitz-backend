@@ -296,13 +296,22 @@ impl NodesStore {
 
 			let mut node = node.unwrap().clone();
 
-			// Mutate values
-			node.pins.push(data);
+			// Find the index of the pin to edit
+			let pin_index_opt = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
+			match pin_index_opt {
+				Some(_) => {
+					return Err(ApiError::NotFound("ALREADY EXISTS".to_string()));
+				}
+				None => {
+					// Mutate values
+					node.pins.push(data);
 
-			// Add new node or overwrite existing one
-			nodes.insert(node_id, node.clone());
+					// Add new node or overwrite existing one
+					nodes.insert(node_id, node.clone());
 
-			Ok(node)
+					Ok(node)
+				}
+			}
 		})
 	}
 
@@ -326,23 +335,26 @@ impl NodesStore {
 			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
 			// }
 
-			let node = nodes.get(&node_id);
-			if node.is_none() {
-				return Err(ApiError::NotFound("NOT FOUND".to_string()));
-			}
+			// Ensure the node exists
+			let node_opt = nodes.get(&node_id);
+			let mut node = match node_opt {
+				Some(n) => n,
+				None => {
+					return Err(ApiError::NotFound("NOT FOUND".to_string()));
+				}
+			};
 
-			let mut node = node.unwrap().clone();
+			// Find the index of the pin to edit
+			let pin_index_opt = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
+			let pin_index = match pin_index_opt {
+				Some(idx) => idx,
+				None => {
+					return Err(ApiError::NotFound("NOT FOUND".to_string()));
+				}
+			};
 
-			// Find pin by PinType
-			let pin_index = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
-			if pin_index.is_none() {
-				return Err(ApiError::NotFound("NOT FOUND".to_string()));
-			}
-
-			// Mutate values
-			node.pins[pin_index.unwrap()] = data;
-
-			// Add new node or overwrite existing one
+			// Update the pin
+			node.pins[pin_index] = data;
 			nodes.insert(node_id, node.clone());
 
 			Ok(node)
