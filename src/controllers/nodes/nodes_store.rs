@@ -20,7 +20,7 @@ use ic_stable_structures::{
 	StableBTreeMap,
 };
 use lib::{
-	types::{ node::{ Node, Pin, NodeType, LookupCanister }, memory::Memory, api_error::ApiError },
+	types::{ node::{ Node, Pin, NodeType, LookupCanister, PinType }, memory::Memory, api_error::ApiError },
 	utils::idempotency::generate_idempotency_key,
 };
 use std::cell::RefCell;
@@ -345,11 +345,23 @@ impl NodesStore {
 			};
 
 			// Find the index of the pin to edit
-			let pin_index_opt = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
+			// Find the index of the pin to edit based on PinType
+			let pin_index_opt = node.pins.iter().position(|pin| {
+				match (&pin.pin_type, &data.pin_type) {
+					(PinType::PrePin(_), PinType::PrePin(_)) => true,
+					(PinType::PostPin(_), PinType::PostPin(_)) => true,
+					(PinType::MapperPin(_), PinType::MapperPin(_)) => true,
+					(PinType::FilterPin(_), PinType::FilterPin(_)) => true,
+					(PinType::LookupTransformPin(_), PinType::LookupTransformPin(_)) => true,
+					(PinType::LookupFilterPin(_), PinType::LookupFilterPin(_)) => true,
+					_ => false,
+				}
+			});
+
 			let pin_index = match pin_index_opt {
 				Some(idx) => idx,
 				None => {
-					return Err(ApiError::NotFound("NOT FOUND".to_string()));
+					return Err(ApiError::NotFound("NODE INDEX NOT FOUND".to_string()));
 				}
 			};
 
