@@ -8,6 +8,14 @@ use lib::{
 use crate::nodes_store::NodesStore;
 
 #[query]
+fn get_circuit_node(node_id: u32) -> Result<Node, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::get_circuit_node(node_id, caller_principal),
+		Err(err) => Err(err),
+	}
+}
+
+#[query]
 fn get_circuit_nodes(circuit_id: u32) -> Result<(Principal, Vec<Node>), ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::get_circuit_nodes(circuit_id, caller_principal),

@@ -46,6 +46,36 @@ thread_local! {
 
 // TODO: add canisater owner check when going live
 impl NodesStore {
+	/// Get node by ID.
+	///
+	/// # Arguments
+	/// - `node_id` - Node ID
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Node` - Node
+	pub fn get_circuit_node(node_id: u32, _caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let nodes = nodes.borrow();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			// Get circuit's nodes
+			let circuit_node = nodes.get(&node_id);
+
+			if let Some(node) = circuit_node {
+				Ok(node.clone())
+			} else {
+				Err(ApiError::NotFound("NOT FOUND".to_string()))
+			}
+		})
+	}
+
 	/// Get nodes by circuit ID.
 	///
 	/// # Arguments
