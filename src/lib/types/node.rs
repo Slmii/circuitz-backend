@@ -191,6 +191,7 @@ pub struct FilterPin {
 	rules: Vec<Rule>,
 	condition: Condition,
 	condition_group: Option<ConditionGroup>,
+	sample_data: Option<String>,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
