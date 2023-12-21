@@ -353,7 +353,7 @@ impl NodesStore {
 	/// - `caller_principal` - Principal of the caller
 	///
 	/// # Returns
-	/// - `Node` - N
+	/// - `Node` - Node
 	pub fn edit_pin(node_id: u32, data: Pin, _caller_principal: Principal) -> Result<Node, ApiError> {
 		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
 
@@ -397,6 +397,62 @@ impl NodesStore {
 
 			// Update the pin
 			node.pins[pin_index] = data;
+			nodes.insert(node_id, node.clone());
+
+			Ok(node)
+		})
+	}
+
+	/// Delete pin from node.
+	///
+	/// # Arguments
+	/// - `node_id` - Circuit ID
+	/// - `pin_id` - Pin ID
+	/// - `caller_principal` - Principal of the caller
+	///
+	/// # Returns
+	/// - `Node` - Node
+	pub fn delete_pin(node_id: u32, data: Pin, _caller_principal: Principal) -> Result<Node, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		NODES.with(|nodes| {
+			let mut nodes = nodes.borrow_mut();
+
+			// if caller_principal.to_string() != canister_owner {
+			// 	// If the caller is not the canister owner, return an error
+			// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+			// }
+
+			// Ensure the node exists
+			let node_opt = nodes.get(&node_id);
+			let mut node = match node_opt {
+				Some(n) => n,
+				None => {
+					return Err(ApiError::NotFound("NOT FOUND".to_string()));
+				}
+			};
+
+			// Find the index of the pin to delete
+			let pin_index_opt = node.pins.iter().position(|pin| {
+				match (&pin.pin_type, &data.pin_type) {
+					(PinType::PrePin(_), PinType::PrePin(_)) => true,
+					(PinType::PostPin(_), PinType::PostPin(_)) => true,
+					(PinType::MapperPin(_), PinType::MapperPin(_)) => true,
+					(PinType::FilterPin(_), PinType::FilterPin(_)) => true,
+					(PinType::LookupTransformPin(_), PinType::LookupTransformPin(_)) => true,
+					(PinType::LookupFilterPin(_), PinType::LookupFilterPin(_)) => true,
+					_ => false,
+				}
+			});
+			let pin_index = match pin_index_opt {
+				Some(idx) => idx,
+				None => {
+					return Err(ApiError::NotFound("NODE INDEX NOT FOUND".to_string()));
+				}
+			};
+
+			// Delete the pin
+			node.pins.remove(pin_index);
 			nodes.insert(node_id, node.clone());
 
 			Ok(node)
