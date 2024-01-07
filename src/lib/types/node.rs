@@ -83,11 +83,12 @@ pub struct Transformer {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Mapper {
-	input: String,
-	output: String,
+pub struct MapperPin {
+	// Input and Output
+	fields: HashMap<String, String>,
 	// Either upload an IDL and read the fields or make a 'sample' request and read the fields
 	interface: String,
+	sample_data: Option<String>,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -171,7 +172,7 @@ pub enum PinType {
 	/// You can use this Pin to apply JS logic to the data within a Node after the Node has finished.
 	PostPin(CustomPinLogic),
 	/// You can use this Pin map data within a Node to a different format
-	MapperPin(Mapper),
+	MapperPin(MapperPin),
 	/// You can use this Pin to filter the Node from being executed
 	FilterPin(FilterPin),
 	/// You can use this Pin to transform the data within a Node after a Node request.
