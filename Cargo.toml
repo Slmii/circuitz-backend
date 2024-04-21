@@ -1,8 +1,3 @@
 [workspace]
-members = [
-    "src/controllers/circuits",
-    "src/controllers/nodes",
-    "src/controllers/users",
-    "src/controllers/traces",
-    "src/lib"
-]
+members = ["src/canister"]
+resolver = "2"

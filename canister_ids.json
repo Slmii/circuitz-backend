@@ -1,18 +1,6 @@
 {
-	"circuits": {
+	"canister": {
 		"local": "rwlgt-iiaaa-aaaaa-aaaaa-cai",
 		"ic": "myqvg-hiaaa-aaaal-ac5da-cai"
-	},
-	"nodes": {
-		"local": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-		"ic": "m7rts-kqaaa-aaaal-ac5dq-cai"
-	},
-	"users": {
-		"local": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-		"ic": "mos4g-maaaa-aaaal-qcevq-cai"
-	},
-	"traces": {
-		"local": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-		"ic": "otpso-7iaaa-aaaal-qce2a-cai"
 	}
 }

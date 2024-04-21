@@ -1,25 +1,14 @@
 {
 	"version": 1,
 	"canisters": {
-		"circuits": {
+		"canister": {
 			"type": "rust",
-			"package": "circuits",
-			"candid": "candid/circuits.did"
-		},
-		"nodes": {
-			"type": "rust",
-			"package": "nodes",
-			"candid": "candid/nodes.did"
-		},
-		"users": {
-			"type": "rust",
-			"package": "users",
-			"candid": "candid/users.did"
-		},
-		"traces": {
-			"type": "rust",
-			"package": "traces",
-			"candid": "candid/traces.did"
+			"package": "canister",
+			"candid": "candid/canister.did",
+			"wasm": "wasm/canister.wasm.gz",
+			"build": [
+				"bash scripts/build.sh"
+			]
 		}
 	}
 }
