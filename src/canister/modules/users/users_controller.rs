@@ -21,9 +21,9 @@ fn get_user() -> Result<User, ApiError> {
 }
 
 #[update]
-async fn create_user(username: Option<String>) -> Result<User, ApiError> {
+fn create_user(username: Option<String>) -> Result<User, ApiError> {
 	match validate_anonymous(&caller()) {
-		Ok(caller_principal) => UsersStore::create_user(caller_principal, username).await,
+		Ok(caller_principal) => UsersStore::create_user(caller_principal, username),
 		Err(err) => Err(err),
 	}
 }

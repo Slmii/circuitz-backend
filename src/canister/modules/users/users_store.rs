@@ -44,7 +44,7 @@ impl UsersStore {
 	///
 	/// # Returns
 	/// - `User` - User
-	pub async fn create_user(caller_principal: Principal, username: Option<String>) -> Result<User, ApiError> {
+	pub fn create_user(caller_principal: Principal, username: Option<String>) -> Result<User, ApiError> {
 		let user = USERS.with(|state| {
 			let mut state = state.borrow_mut();
 
