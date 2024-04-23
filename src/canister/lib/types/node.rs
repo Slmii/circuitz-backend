@@ -96,7 +96,6 @@ pub enum Arg {
 	Principal(Principal),
 	BigInt(u64),
 	Boolean(bool),
-	Field(String),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
