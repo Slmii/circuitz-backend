@@ -71,15 +71,6 @@ pub struct Transformer {
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct MapperPin {
-	// Input and Output
-	fields: HashMap<String, String>,
-	// Either upload an IDL and read the fields or make a 'sample' request and read the fields
-	interface: String,
-	sample_data: Option<String>,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct LookupCanister {
 	pub name: String,
 	pub description: Option<String>,
@@ -173,6 +164,13 @@ pub enum PinType {
 pub struct CustomPinLogic {
 	function: Option<String>,
 	script: Option<String>,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct MapperPin {
+	// Input and Output
+	fields: HashMap<String, String>,
+	sample_data: Option<String>,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
