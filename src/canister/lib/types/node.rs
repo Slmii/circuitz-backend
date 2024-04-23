@@ -78,6 +78,7 @@ pub struct LookupCanister {
 	pub method: String,
 	pub args: Vec<Arg>,
 	pub cycles: u128,
+	pub sample_data: Option<String>,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
