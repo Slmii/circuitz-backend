@@ -7,6 +7,7 @@ impl_storable_for!(Circuit);
 pub struct Circuit {
 	pub id: u32,
 	pub user_id: Principal,
+	pub node_canister_id: Principal,
 	pub name: String,
 	pub description: Option<String>,
 	pub is_favorite: bool,
@@ -22,6 +23,7 @@ impl Circuit {
 		Self {
 			id: Default::default(),
 			user_id: Principal::anonymous(),
+			node_canister_id: Principal::anonymous(),
 			name: Default::default(),
 			description: Default::default(),
 			is_favorite: Default::default(),

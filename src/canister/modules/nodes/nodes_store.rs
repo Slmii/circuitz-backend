@@ -21,6 +21,20 @@ use crate::{
 	storage::canister_storage::NODES,
 };
 
+// TODO: add node owner check to all calls
+// thread_local! {
+// 	pub static CANISTER_OWNER: RefCell<StableCell<String, Memory>> = RefCell::new(
+// 		StableCell::init(
+// 			MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
+// 			String::default()
+// 		).expect("Failed to initialize CANISTER_OWNER")
+// 	);
+// }
+// if caller_principal.to_string() != canister_owner {
+// 	// If the caller is not the canister owner, return an error
+// 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
+// }
+
 pub struct NodesStore;
 
 impl NodesStore {
