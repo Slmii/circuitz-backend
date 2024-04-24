@@ -96,6 +96,8 @@ pub enum Arg {
 	Principal(Principal),
 	BigInt(u64),
 	Boolean(bool),
+	Array(Vec<Arg>),
+	Object(HashMap<String, Arg>),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
