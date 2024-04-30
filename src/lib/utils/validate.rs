@@ -1,6 +1,5 @@
 use candid::Principal;
-
-use crate::lib::{ types::api_error::ApiError, whitelist::whitelist };
+use crate::{ types::api_error::ApiError, whitelist::whitelist };
 
 /// Validate anonymous.
 ///

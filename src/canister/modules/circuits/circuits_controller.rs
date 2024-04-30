@@ -1,9 +1,7 @@
 use candid::Principal;
 use ic_cdk::{ caller, query, update };
-use crate::{
-	lib::{ types::{ api_error::ApiError, circuit::{ Circuit, PostCircuit } }, utils::validate::validate_anonymous },
-	modules::circuits::circuits_store::CircuitsStore,
-};
+use lib::{ types::{ api_error::ApiError, circuit::{ Circuit, PostCircuit } }, utils::validate::validate_anonymous };
+use super::circuits_store::CircuitsStore;
 
 #[query]
 fn get_circuit(circuit_id: u32) -> Result<Circuit, ApiError> {

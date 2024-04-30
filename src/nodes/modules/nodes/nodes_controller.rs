@@ -5,13 +5,11 @@ use ic_cdk::{
 	query,
 	update,
 };
-use crate::{
-	lib::{
-		types::{ api_error::ApiError, node::{ LookupCanister, Node, NodeType, Pin } },
-		utils::validate::validate_anonymous,
-	},
-	modules::nodes::nodes_store::NodesStore,
+use lib::{
+	types::{ api_error::ApiError, node::{ LookupCanister, Node, NodeType, Pin } },
+	utils::validate::validate_anonymous,
 };
+use super::nodes_store::NodesStore;
 
 #[query]
 fn get_circuit_node(node_id: u32) -> Result<Node, ApiError> {

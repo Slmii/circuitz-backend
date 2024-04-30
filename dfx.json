@@ -9,6 +9,15 @@
 			"build": [
 				"bash scripts/build.sh"
 			]
+		},
+		"nodes": {
+			"type": "rust",
+			"package": "canister",
+			"candid": "candid/nodes.did",
+			"wasm": "wasm/nodes.wasm.gz",
+			"build": [
+				"bash scripts/build.sh"
+			]
 		}
 	}
 }

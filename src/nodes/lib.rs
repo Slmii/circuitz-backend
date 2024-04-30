@@ -4,19 +4,9 @@ use ic_cdk::query;
 pub mod canister_storage;
 
 pub mod modules {
-	pub mod circuits {
-		pub mod circuits_controller;
-		pub mod circuits_store;
-	}
-
-	pub mod traces {
-		pub mod traces_controller;
-		pub mod traces_store;
-	}
-
-	pub mod users {
-		pub mod users_controller;
-		pub mod users_store;
+	pub mod nodes {
+		pub mod nodes_controller;
+		pub mod nodes_store;
 	}
 }
 
@@ -25,9 +15,8 @@ pub mod modules {
 pub fn __export_did_tmp_() -> String {
 	use candid::export_service;
 	use lib::types::api_error::*;
-	use lib::types::circuit::*;
-	use lib::types::trace::*;
-	use lib::types::user::*;
+	use lib::types::node::*;
+	use ic_cdk::api::management_canister::http_request::{ TransformArgs, HttpResponse };
 
 	export_service!();
 	__export_service()
@@ -42,5 +31,5 @@ pub fn candid() {
 
 	let dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 	let dir = dir.parent().unwrap().parent().unwrap().join("candid");
-	write(dir.join(format!("canister.did")), __export_did_tmp_()).expect("Write failed.");
+	write(dir.join(format!("nodes.did")), __export_did_tmp_()).expect("Write failed.");
 }

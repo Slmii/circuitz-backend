@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use candid::{ CandidType, types::principal::Principal };
 use serde::{ Deserialize, Serialize };
-use crate::{ impl_storable_for, lib::types::headers::Headers };
+use crate::impl_storable_for;
+use super::headers::Headers;
 
 impl_storable_for!(Node);
 #[derive(Clone, Debug, CandidType, Deserialize)]

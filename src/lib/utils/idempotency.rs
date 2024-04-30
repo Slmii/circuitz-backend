@@ -1,5 +1,5 @@
 use candid::Principal;
-use crate::lib::types::api_error::ApiError;
+use crate::types::api_error::ApiError;
 
 pub async fn generate_idempotency_key() -> Result<String, ApiError> {
 	let result: Result<(Vec<u8>,), _> = ic_cdk::api::call::call(Principal::management_canister(), "raw_rand", ()).await;

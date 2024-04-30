@@ -1,9 +1,8 @@
 use candid::Principal;
 use ic_cdk::api::time;
-use crate::{
-	lib::types::{ api_error::ApiError, circuit::{ Circuit, PostCircuit }, circuit_key::CircuitKey },
-	storage::canister_storage::CIRCUITS,
-};
+use lib::types::{ api_error::ApiError, circuit::{ Circuit, PostCircuit }, circuit_key::CircuitKey };
+use crate::canister_storage::CIRCUITS;
+
 pub struct CircuitsStore;
 
 impl CircuitsStore {

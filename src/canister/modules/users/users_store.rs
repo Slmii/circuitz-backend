@@ -1,6 +1,7 @@
 use candid::Principal;
 use ic_cdk::api::time;
-use crate::{ lib::types::{ api_error::ApiError, user::User }, storage::canister_storage::USERS };
+use lib::types::{ api_error::ApiError, user::User };
+use crate::canister_storage::USERS;
 
 pub struct UsersStore;
 

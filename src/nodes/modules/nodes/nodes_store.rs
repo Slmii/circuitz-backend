@@ -13,13 +13,12 @@ use ic_cdk::{
 	},
 	id,
 };
-use crate::{
-	lib::{
-		types::{ api_error::ApiError, node::{ LookupCanister, Node, NodeType, Pin, PinType } },
-		utils::idempotency::generate_idempotency_key,
-	},
-	storage::canister_storage::NODES,
+use lib::{
+	types::{ api_error::ApiError, node::{ LookupCanister, Node, NodeType, Pin, PinType } },
+	utils::idempotency::generate_idempotency_key,
 };
+
+use crate::canister_storage::NODES;
 
 // TODO: add node owner check to all calls
 // thread_local! {

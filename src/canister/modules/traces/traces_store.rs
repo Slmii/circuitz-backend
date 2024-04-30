@@ -1,5 +1,6 @@
 use candid::Principal;
-use crate::{ lib::types::trace::Trace, storage::canister_storage::TRACES };
+use lib::types::trace::Trace;
+use crate::canister_storage::TRACES;
 
 pub struct TracesStore;
 

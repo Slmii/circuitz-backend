@@ -1,8 +1,6 @@
 use ic_cdk::{ caller, query };
-use crate::{
-	lib::{ types::{ api_error::ApiError, trace::Trace }, utils::validate::validate_anonymous },
-	modules::traces::traces_store::TracesStore,
-};
+use lib::{ types::{ api_error::ApiError, trace::Trace }, utils::validate::validate_anonymous };
+use super::traces_store::TracesStore;
 
 #[query]
 fn get_circuit_traces(circuit_id: u32) -> Result<Vec<Trace>, ApiError> {
