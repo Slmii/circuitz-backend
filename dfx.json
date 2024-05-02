@@ -12,7 +12,7 @@
 		},
 		"nodes": {
 			"type": "rust",
-			"package": "canister",
+			"package": "nodes",
 			"candid": "candid/nodes.did",
 			"wasm": "wasm/nodes.wasm.gz",
 			"build": [
