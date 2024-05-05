@@ -14,7 +14,7 @@ use ic_cdk::{
 	id,
 };
 use lib::{
-	node_server::{ HOST, URL },
+	node_server::{ HOST, URL_API_FORWARDING, URL_ICC },
 	types::{ api_error::ApiError, node::{ LookupCanister, LookupHttpRequest, Node, NodeType, Pin, PinType } },
 	utils::idempotency::generate_idempotency_key,
 };
@@ -421,7 +421,7 @@ impl NodesStore {
 			"args": data.args,
 		});
 
-		Self::http_request_call(body, data.cycles).await
+		Self::http_request_call(body, data.cycles, URL_ICC).await
 	}
 
 	/// Preview lookup HTTP Request
@@ -445,7 +445,7 @@ impl NodesStore {
 			"headers": data.headers,
 		});
 
-		Self::http_request_call(body, data.cycles).await
+		Self::http_request_call(body, data.cycles, URL_API_FORWARDING).await
 	}
 
 	/// Canister HTTP Request call
@@ -453,7 +453,7 @@ impl NodesStore {
 	/// # Arguments
 	/// - `body` - Value
 	/// - `cycles` - u128
-	async fn http_request_call(body: Value, cycles: u128) -> Result<String, ApiError> {
+	async fn http_request_call(body: Value, cycles: u128, url: &str) -> Result<String, ApiError> {
 		// Prepare headers for the system http_request call
 		let request_headers = vec![
 			HttpHeader {
@@ -477,7 +477,7 @@ impl NodesStore {
 		let request_body: Option<Vec<u8>> = Some(body.to_string().into_bytes());
 
 		let request = CanisterHttpRequestArgument {
-			url: URL.to_string(),
+			url: url.to_string(),
 			max_response_bytes: None, //optional for request
 			method: HttpMethod::POST,
 			headers: request_headers,
