@@ -108,6 +108,7 @@ pub struct HttpRequest {
 	name: String,
 	description: Option<String>,
 	pub url: String,
+	pub dynamic_url: Option<String>,
 	pub method: HttpMethod,
 	pub headers: Headers,
 	pub request_body: Option<String>,
