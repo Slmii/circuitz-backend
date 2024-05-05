@@ -6,7 +6,7 @@ use ic_cdk::{
 	update,
 };
 use lib::{
-	types::{ api_error::ApiError, node::{ LookupCanister, Node, NodeType, Pin } },
+	types::{ api_error::ApiError, node::{ LookupCanister, HttpRequest, Node, NodeType, Pin } },
 	utils::validate::validate_anonymous,
 };
 use super::nodes_store::NodesStore;
@@ -147,6 +147,14 @@ fn disable_node(node_id: u32) -> Result<Node, ApiError> {
 async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::preview_lookup_request(data, caller_principal).await,
+		Err(err) => Err(err),
+	}
+}
+
+#[update]
+async fn preview_http_request(data: HttpRequest) -> Result<String, ApiError> {
+	match validate_anonymous(&caller()) {
+		Ok(caller_principal) => NodesStore::preview_http_request(data, caller_principal).await,
 		Err(err) => Err(err),
 	}
 }

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use candid::{ CandidType, types::principal::Principal };
+use ic_cdk::api::management_canister::http_request::HttpMethod;
 use serde::{ Deserialize, Serialize };
 use crate::impl_storable_for;
 use super::headers::Headers;
@@ -82,14 +83,6 @@ pub struct LookupCanister {
 	pub sample_data: String,
 }
 
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct LookupHttpRequest {
-	pub name: String,
-	pub description: Option<String>,
-	pub url: String,
-	pub headers: Headers,
-}
-
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Arg {
 	String(String),
@@ -105,21 +98,12 @@ pub enum Arg {
 pub struct HttpRequest {
 	name: String,
 	description: Option<String>,
-	url: String,
-	method: HttpRequestMethod,
-	headers: Headers,
-	request_body: Option<String>,
-	cycles: u128,
+	pub url: String,
+	pub method: HttpMethod,
+	pub headers: Headers,
+	pub request_body: Option<String>,
+	pub cycles: u128,
 	sample_data: String,
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
-pub enum HttpRequestMethod {
-	GET,
-	POST,
-	PUT,
-	DELETE,
-	PATCH,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]

@@ -14,9 +14,11 @@ use ic_cdk::{
 	id,
 };
 use lib::{
-	types::{ api_error::ApiError, node::{ LookupCanister, Node, NodeType, Pin, PinType } },
+	types::{ api_error::ApiError, node::{ HttpRequest, LookupCanister, Node, NodeType, Pin, PinType } },
 	utils::idempotency::generate_idempotency_key,
 };
+use serde_json::Value;
+use url::Url;
 
 use crate::canister_storage::NODES;
 
@@ -411,6 +413,8 @@ impl NodesStore {
 		data: LookupCanister,
 		_caller_principal: Principal
 	) -> Result<String, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
 		// Setup the URL
 		let host = "circuitz-node-modlx.ondigitalocean.app";
 		let url = "https://circuitz-node-modlx.ondigitalocean.app/icc";
@@ -425,8 +429,6 @@ impl NodesStore {
 				name: "User-Agent".to_string(),
 				value: "demo_HTTP_POST_canister".to_string(),
 			},
-			//For the purposes of this exercise, Idempotency-Key" is hard coded, but in practice
-			//it should be generated via code and unique to each POST request. Common to create helper methods for this
 			HttpHeader {
 				name: "Idempotency-Key".to_string(),
 				value: generate_idempotency_key().await.unwrap(),
@@ -471,8 +473,122 @@ impl NodesStore {
 
 				// We need to decode that Vec<u8> that is the body into readable text.
 				// To do this, we:
+				// 1. Call `String::from_utf8()` on response.body
+				// 2. We use a switch to explicitly call out both cases of decoding the Blob into ?Text
+				let str_body = String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.");
+
+				return Ok(str_body);
+			}
+			Err((r, m)) => {
+				let message = format!("The http_request resulted into error. RejectionCode: {r:?}, Error: {m}");
+
+				//Return the error as a string and end the method
+				return Err(ApiError::InterCanister(message));
+			}
+		}
+	}
+
+	/// Preview lookup HTTP Request
+	///
+	/// # Arguments
+	/// - `data` - LookupHttpRequest
+	///
+	/// # Returns
+	/// - `Unknown` - Unknown data from the canister
+	pub async fn preview_http_request(data: HttpRequest, _caller_principal: Principal) -> Result<String, ApiError> {
+		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());
+
+		// Get HOST from URL
+		let parsed_url = Url::parse(&data.url).expect("Failed to parse the URL");
+		let host = match parsed_url.host_str() {
+			Some(host) => host,
+			None => {
+				return Err(ApiError::NotFound("URL HOST NOT FOUND".to_string()));
+			}
+		};
+
+		let mut request_headers = vec![
+			HttpHeader {
+				name: "Host".to_string(),
+				value: format!("{host}:443"),
+			},
+			HttpHeader {
+				name: "User-Agent".to_string(),
+				value: "lookup_http_request".to_string(),
+			}
+		];
+
+		let mut request_body: Option<Vec<u8>> = None;
+		if data.method == HttpMethod::POST {
+			// Add Idempotency-Key header if the method is POST
+			request_headers.push(HttpHeader {
+				name: "Idempotency-Key".to_string(),
+				value: generate_idempotency_key().await.unwrap(),
+			});
+
+			// Prepare the request body
+			if let Some(request_body_data) = data.request_body {
+				let request_body_value: Value = serde_json::from_str(&request_body_data.to_string()).unwrap();
+				request_body = Some(request_body_value.to_string().into_bytes());
+			}
+		}
+
+		// Append the headers to "request_headers" from data.headers
+		for header in data.headers {
+			request_headers.push(HttpHeader {
+				name: header.0,
+				value: header.1,
+			});
+		}
+
+		let request = CanisterHttpRequestArgument {
+			url: data.url,
+			method: data.method,
+			body: request_body,
+			max_response_bytes: None,
+			transform: Some(TransformContext {
+				// The "method" parameter needs to the same name as the function name of your transform function
+				function: TransformFunc(candid::Func {
+					principal: ic_cdk::api::id(),
+					method: "transform".to_string(),
+				}),
+				// The "TransformContext" function does need a context parameter, it can be empty
+				context: vec![],
+			}),
+			headers: request_headers,
+		};
+
+		match http_request(request, data.cycles).await {
+			Ok((response,)) => {
+				// if successful, `HttpResponse` has this structure:
+				// pub struct HttpResponse {
+				//     pub status: Nat,
+				//     pub headers: Vec<HttpHeader>,
+				//     pub body: Vec<u8>,
+				// }
+
+				// You need to decode that Vec<u8> that is the body into readable text.
+				// To do this:
 				//  1. Call `String::from_utf8()` on response.body
-				//  3. We use a switch to explicitly call out both cases of decoding the Blob into ?Text
+				//  2. You use a switch to explicitly call out both cases of decoding the Blob into ?Text
+
+				// The API response will looks like this:
+
+				// ("[[1682978460,5.714,5.718,5.714,5.714,243.5678]]")
+
+				// Which can be formatted as this
+				//  [
+				//     [
+				//         1682978460, <-- start/timestamp
+				//         5.714, <-- low
+				//         5.718, <-- high
+				//         5.714, <-- open
+				//         5.714, <-- close
+				//         243.5678 <-- volume
+				//     ],
+				//  ]
+
+				// Return the body as a string and end the method
 				let str_body = String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.");
 
 				return Ok(str_body);
