@@ -79,7 +79,7 @@ pub struct LookupCanister {
 	pub method: String,
 	pub args: Vec<Arg>,
 	pub cycles: u128,
-	pub sample_data: Option<String>,
+	pub sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -123,7 +123,7 @@ pub struct Canister {
 	name: String,
 	verification_type: VerificationType,
 	description: Option<String>,
-	sample_data: Option<String>,
+	sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -171,7 +171,7 @@ pub struct CustomPinLogic {
 pub struct MapperPin {
 	// Input and Output
 	fields: HashMap<String, String>,
-	sample_data: Option<String>,
+	sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -179,7 +179,7 @@ pub struct FilterPin {
 	rules: Vec<Rule>,
 	condition: Condition,
 	condition_group: Option<ConditionGroup>,
-	sample_data: Option<String>,
+	sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
