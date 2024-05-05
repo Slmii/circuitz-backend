@@ -83,6 +83,15 @@ pub struct LookupCanister {
 	pub sample_data: String,
 }
 
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct LookupHttpRequest {
+	pub url: String,
+	pub method: HttpMethod,
+	pub headers: Headers,
+	pub request_body: Option<String>,
+	pub cycles: u128,
+}
+
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Arg {
 	String(String),

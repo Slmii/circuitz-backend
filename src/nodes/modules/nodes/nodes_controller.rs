@@ -6,7 +6,7 @@ use ic_cdk::{
 	update,
 };
 use lib::{
-	types::{ api_error::ApiError, node::{ LookupCanister, HttpRequest, Node, NodeType, Pin } },
+	types::{ api_error::ApiError, node::{ LookupCanister, LookupHttpRequest, Node, NodeType, Pin } },
 	utils::validate::validate_anonymous,
 };
 use super::nodes_store::NodesStore;
@@ -152,7 +152,7 @@ async fn preview_lookup_request(data: LookupCanister) -> Result<String, ApiError
 }
 
 #[update]
-async fn preview_http_request(data: HttpRequest) -> Result<String, ApiError> {
+async fn preview_http_request(data: LookupHttpRequest) -> Result<String, ApiError> {
 	match validate_anonymous(&caller()) {
 		Ok(caller_principal) => NodesStore::preview_http_request(data, caller_principal).await,
 		Err(err) => Err(err),
