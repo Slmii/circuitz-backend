@@ -107,9 +107,10 @@ pub struct HttpRequest {
 	description: Option<String>,
 	url: String,
 	method: HttpRequestMethod,
-	// Store header name and value
 	headers: Headers,
 	request_body: Option<String>,
+	cycles: u128,
+	sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]

@@ -277,7 +277,7 @@ impl NodesStore {
 
 			let mut node = node.unwrap().clone();
 
-			// Find the index of the pin to edit
+			// Check if the pin already exists
 			let pin_index_opt = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
 			match pin_index_opt {
 				Some(_) => {
@@ -320,7 +320,6 @@ impl NodesStore {
 				}
 			};
 
-			// Find the index of the pin to edit
 			// Find the index of the pin to edit based on PinType
 			let pin_index_opt = node.pins.iter().position(|pin| {
 				match (&pin.pin_type, &data.pin_type) {
@@ -385,6 +384,7 @@ impl NodesStore {
 					_ => false,
 				}
 			});
+
 			let pin_index = match pin_index_opt {
 				Some(idx) => idx,
 				None => {
