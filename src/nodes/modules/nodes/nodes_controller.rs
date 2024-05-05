@@ -68,6 +68,7 @@ fn transform(raw: TransformArgs) -> HttpResponse {
 	} else {
 		ic_cdk::api::print(format!("Received an error: err = {:?}", raw));
 	}
+
 	res
 }
 
