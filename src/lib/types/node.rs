@@ -117,6 +117,9 @@ pub struct HttpRequest {
 pub enum HttpRequestMethod {
 	GET,
 	POST,
+	PUT,
+	DELETE,
+	PATCH,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
