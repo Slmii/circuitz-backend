@@ -36,6 +36,9 @@ use crate::canister_storage::NODES;
 // 	return Err(ApiError::NotFound("UNAUTHORIZED".to_string()));
 // }
 
+// Handlebars with json helper
+// https://docs.rs/handlebars/latest/handlebars/#string-or-case-helpers
+
 pub struct NodesStore;
 
 impl NodesStore {
