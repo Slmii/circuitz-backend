@@ -199,7 +199,7 @@ pub struct Rule {
 	dynamic_field: String,
 	operator: Operator,
 	value: String,
-	dynamic_valie: Option<String>,
+	dynamic_value: Option<String>,
 	operand: Operand,
 }
 
