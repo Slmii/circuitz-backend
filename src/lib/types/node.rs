@@ -79,7 +79,7 @@ pub struct LookupCanister {
 	pub canister: Principal,
 	pub method: String,
 	pub args: Vec<Arg>,
-	pub dynamic_args: Vec<Arg>,
+	pub dynamic_args: Vec<DynamicArg>,
 	pub cycles: u128,
 	pub sample_data: String,
 }
@@ -102,6 +102,17 @@ pub enum Arg {
 	Boolean(bool),
 	Array(Vec<Arg>),
 	Object(HashMap<String, Arg>),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DynamicArg {
+	String(String),
+	Number(String),
+	Principal(String),
+	BigInt(String),
+	Boolean(String),
+	Array(String),
+	Object(String),
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
