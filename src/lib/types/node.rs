@@ -79,6 +79,7 @@ pub struct LookupCanister {
 	pub canister: Principal,
 	pub method: String,
 	pub args: Vec<Arg>,
+	pub dynamic_args: Vec<Arg>,
 	pub cycles: u128,
 	pub sample_data: String,
 }
