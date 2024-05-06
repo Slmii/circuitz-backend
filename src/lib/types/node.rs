@@ -112,6 +112,7 @@ pub struct HttpRequest {
 	pub method: HttpMethod,
 	pub headers: Headers,
 	pub request_body: Option<String>,
+	pub dynamic_request_body: Option<String>,
 	pub cycles: u128,
 	sample_data: String,
 }
