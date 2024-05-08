@@ -108,11 +108,9 @@ pub struct HttpRequest {
 	name: String,
 	description: Option<String>,
 	pub url: String,
-	pub dynamic_url: Option<String>,
 	pub method: HttpMethod,
 	pub headers: Headers,
 	pub request_body: Option<String>,
-	pub dynamic_request_body: Option<String>,
 	pub cycles: u128,
 	sample_data: String,
 }
@@ -258,4 +256,13 @@ pub enum PreviewArg {
 	Boolean(bool),
 	Array(Vec<Arg>),
 	Object(HashMap<String, Arg>),
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct LookupHttpRequestPreview {
+	pub url: String,
+	pub method: HttpMethod,
+	pub headers: Headers,
+	pub request_body: Option<String>,
+	pub cycles: u128,
 }
