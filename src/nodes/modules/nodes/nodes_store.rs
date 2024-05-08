@@ -15,7 +15,7 @@ use ic_cdk::{
 };
 use lib::{
 	node_server::{ HOST, URL_API_FORWARDING, URL_ICC },
-	types::{ api_error::ApiError, node::{ LookupCanister, LookupHttpRequest, Node, NodeType, Pin, PinType } },
+	types::{ api_error::ApiError, node::{ LookupCanisterPreview, LookupHttpRequest, Node, NodeType, Pin, PinType } },
 	utils::idempotency::generate_idempotency_key,
 };
 use serde_json::Value;
@@ -408,12 +408,12 @@ impl NodesStore {
 	/// Preview lookup canister request
 	///
 	/// # Arguments
-	/// - `data` - LookupCanister
+	/// - `data` - LookupCanisterPreview
 	///
 	/// # Returns
 	/// - `Unknown` - Unknown data from the canister
 	pub async fn preview_lookup_canister(
-		data: LookupCanister,
+		data: LookupCanisterPreview,
 		_caller_principal: Principal
 	) -> Result<String, ApiError> {
 		// let canister_owner = CANISTER_OWNER.with(|canister_owner| canister_owner.borrow().get().clone());

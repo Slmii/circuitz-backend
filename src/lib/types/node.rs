@@ -79,7 +79,6 @@ pub struct LookupCanister {
 	pub canister: Principal,
 	pub method: String,
 	pub args: Vec<Arg>,
-	pub dynamic_args: Vec<DynamicArg>,
 	pub cycles: u128,
 	pub sample_data: String,
 }
@@ -95,17 +94,6 @@ pub struct LookupHttpRequest {
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Arg {
-	String(String),
-	Number(u32),
-	Principal(Principal),
-	BigInt(u64),
-	Boolean(bool),
-	Array(Vec<Arg>),
-	Object(HashMap<String, Arg>),
-}
-
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum DynamicArg {
 	String(String),
 	Number(String),
 	Principal(String),
@@ -251,4 +239,23 @@ pub enum DataType {
 pub struct LookupTransformPin {
 	input: String,
 	output: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct LookupCanisterPreview {
+	pub canister: Principal,
+	pub method: String,
+	pub args: Vec<PreviewArg>,
+	pub cycles: u128,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PreviewArg {
+	String(String),
+	Number(u32),
+	Principal(Principal),
+	BigInt(u64),
+	Boolean(bool),
+	Array(Vec<Arg>),
+	Object(HashMap<String, Arg>),
 }
