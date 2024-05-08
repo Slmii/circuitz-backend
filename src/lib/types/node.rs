@@ -182,10 +182,8 @@ pub struct FilterPin {
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Rule {
 	field: String,
-	dynamic_field: String,
 	operator: Operator,
 	value: String,
-	dynamic_value: String,
 	operand: Operand,
 }
 
