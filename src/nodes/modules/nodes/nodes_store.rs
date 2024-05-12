@@ -333,7 +333,8 @@ impl NodesStore {
 				match (&pin.pin_type, &data.pin_type) {
 					(PinType::PrePin(_), PinType::PrePin(_)) => true,
 					(PinType::PostPin(_), PinType::PostPin(_)) => true,
-					(PinType::MapperPin(_), PinType::MapperPin(_)) => true,
+					(PinType::PreMapperPin(_), PinType::PreMapperPin(_)) => true,
+					(PinType::PostMapperPin(_), PinType::PostMapperPin(_)) => true,
 					(PinType::FilterPin(_), PinType::FilterPin(_)) => true,
 					(PinType::LookupTransformPin(_), PinType::LookupTransformPin(_)) => true,
 					(PinType::LookupFilterPin(_), PinType::LookupFilterPin(_)) => true,
@@ -385,7 +386,8 @@ impl NodesStore {
 				match (&pin.pin_type, &data.pin_type) {
 					(PinType::PrePin(_), PinType::PrePin(_)) => true,
 					(PinType::PostPin(_), PinType::PostPin(_)) => true,
-					(PinType::MapperPin(_), PinType::MapperPin(_)) => true,
+					(PinType::PreMapperPin(_), PinType::PreMapperPin(_)) => true,
+					(PinType::PostMapperPin(_), PinType::PostMapperPin(_)) => true,
 					(PinType::FilterPin(_), PinType::FilterPin(_)) => true,
 					(PinType::LookupTransformPin(_), PinType::LookupTransformPin(_)) => true,
 					(PinType::LookupFilterPin(_), PinType::LookupFilterPin(_)) => true,

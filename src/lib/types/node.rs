@@ -149,7 +149,8 @@ pub enum PinType {
 	/// You can use this Pin to apply JS logic to the data within a Node after the Node has finished.
 	PostPin(CustomPinLogic),
 	/// You can use this Pin map data within a Node to a different format
-	MapperPin(MapperPin),
+	PreMapperPin(MapperPin),
+	PostMapperPin(MapperPin),
 	/// You can use this Pin to filter the Node from being executed
 	FilterPin(FilterPin),
 	/// You can use this Pin to transform the data within a Node after a Node request.
@@ -167,7 +168,7 @@ pub struct CustomPinLogic {
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct MapperPin {
 	// Input and Output
-	fields: HashMap<String, String>,
+	fields: Vec<(String, String)>,
 	sample_data: String,
 }
 
