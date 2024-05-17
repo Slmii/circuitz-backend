@@ -14,7 +14,7 @@ pub fn validate_anonymous(principal: &Principal) -> Result<Principal, ApiError> 
 			return Err(ApiError::Unauthorized("UNAUTHORIZED".to_string()));
 		}
 
-		return Ok(*principal);
+		Ok(*principal)
 	})
 }
 
@@ -26,7 +26,7 @@ pub fn validate_anonymous(principal: &Principal) -> Result<Principal, ApiError> 
 /// # Returns
 /// - `Result<Principal, ApiError>` - Principal or ApiError
 pub fn validate_admin(principal: &Principal) -> Result<Principal, ApiError> {
-	if !whitelist().contains(&principal) {
+	if !whitelist().contains(principal) {
 		return Err(ApiError::Unauthorized("UNAUTHORIZED".to_string()));
 	}
 

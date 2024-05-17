@@ -63,7 +63,7 @@ fn transform(raw: TransformArgs) -> HttpResponse {
 		..Default::default()
 	};
 
-	if res.status == (200 as u32) {
+	if res.status == 200_u32 {
 		res.body = raw.response.body;
 	} else {
 		ic_cdk::api::print(format!("Received an error: err = {:?}", raw));

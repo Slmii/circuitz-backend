@@ -288,9 +288,7 @@ impl NodesStore {
 			// Check if the pin already exists
 			let pin_index_opt = node.pins.iter().position(|pin| pin.pin_type == data.pin_type);
 			match pin_index_opt {
-				Some(_) => {
-					return Err(ApiError::NotFound("ALREADY EXISTS".to_string()));
-				}
+				Some(_) => Err(ApiError::NotFound("ALREADY EXISTS".to_string())),
 				None => {
 					// Mutate values
 					node.pins.push(data);
@@ -532,13 +530,13 @@ impl NodesStore {
 				// Return the body as a string and end the method
 				let str_body = String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.");
 
-				return Ok(str_body);
+				Ok(str_body)
 			}
 			Err((r, m)) => {
 				let message = format!("The http_request resulted into error. RejectionCode: {r:?}, Error: {m}");
 
 				//Return the error as a string and end the method
-				return Err(ApiError::InterCanister(message));
+				Err(ApiError::InterCanister(message))
 			}
 		}
 	}
