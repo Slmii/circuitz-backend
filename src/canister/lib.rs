@@ -9,6 +9,11 @@ pub mod modules {
 		pub mod circuits_store;
 	}
 
+	pub mod connectors {
+		pub mod connectors_controller;
+		pub mod connectors_store;
+	}
+
 	pub mod traces {
 		pub mod traces_controller;
 		pub mod traces_store;
@@ -28,6 +33,7 @@ pub fn __export_did_tmp_() -> String {
 	use lib::types::circuit::*;
 	use lib::types::trace::*;
 	use lib::types::user::*;
+	use lib::types::connector::*;
 
 	export_service!();
 	__export_service()
