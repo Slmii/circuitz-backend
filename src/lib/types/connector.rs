@@ -6,6 +6,7 @@ impl_storable_for!(Connector);
 #[derive(CandidType, Clone, Deserialize)]
 pub struct Connector {
 	pub name: String,
+	pub description: Option<String>,
 	pub connector_type: ConnectorType,
 }
 
@@ -13,6 +14,7 @@ impl Default for Connector {
 	fn default() -> Self {
 		Self {
 			name: Default::default(),
+			description: Default::default(),
 			connector_type: ConnectorType::Http(HttpConnector {
 				base_url: Default::default(),
 				headers: Default::default(),
