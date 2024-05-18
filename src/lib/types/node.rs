@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use candid::{ CandidType, types::principal::Principal };
-use ic_cdk::api::management_canister::http_request::HttpMethod;
 use serde::{ Deserialize, Serialize };
 use crate::impl_storable_for;
 use super::headers::Headers;
@@ -86,7 +85,7 @@ pub struct LookupCanister {
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct LookupHttpRequest {
 	pub url: String,
-	pub method: HttpMethod,
+	pub method: HttpRequestMethod,
 	pub headers: Headers,
 	pub request_body: Option<String>,
 	pub cycles: u128,
@@ -108,11 +107,19 @@ pub struct HttpRequest {
 	name: String,
 	description: Option<String>,
 	pub url: String,
-	pub method: HttpMethod,
+	pub method: HttpRequestMethod,
 	pub headers: Headers,
 	pub request_body: Option<String>,
 	pub cycles: u128,
 	sample_data: String,
+}
+
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HttpRequestMethod {
+	GET,
+	POST,
+	PUT,
+	DELETE,
 }
 
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -257,10 +264,10 @@ pub enum PreviewArg {
 	Object(HashMap<String, Arg>),
 }
 
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(CandidType, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LookupHttpRequestPreview {
 	pub url: String,
-	pub method: HttpMethod,
+	pub method: HttpRequestMethod,
 	pub headers: Headers,
 	pub request_body: Option<String>,
 	pub cycles: u128,

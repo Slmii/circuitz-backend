@@ -1,11 +1,19 @@
 use ic_stable_structures::{ memory_manager::{ MemoryManager, MemoryId }, DefaultMemoryImpl, StableBTreeMap };
-use lib::types::{ circuit::Circuit, circuit_key::CircuitKey, trace::Trace, trace_key::TraceKey, user::User };
+use lib::types::{
+	circuit::Circuit,
+	circuit_key::CircuitKey,
+	connector::Connector,
+	trace::Trace,
+	trace_key::TraceKey,
+	user::User,
+};
 use std::cell::RefCell;
 use ic_stable_structures::memory_manager::VirtualMemory;
 
 static CIRCUITS_MEMORY_ID: MemoryId = MemoryId::new(2);
 static TRACES_MEMORY_ID: MemoryId = MemoryId::new(3);
 static USERS_MEMORY_ID: MemoryId = MemoryId::new(4);
+static CONNECTORS_MEMORY_ID: MemoryId = MemoryId::new(5);
 
 pub type Memory = VirtualMemory<DefaultMemoryImpl>;
 
@@ -29,5 +37,9 @@ thread_local! {
 
 	pub static USERS: StorageRef<String, User> = RefCell::new(
 		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(USERS_MEMORY_ID)))
+	);
+
+	pub static CONNECTORS: StorageRef<String, Connector> = RefCell::new(
+		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(CONNECTORS_MEMORY_ID)))
 	);
 }
