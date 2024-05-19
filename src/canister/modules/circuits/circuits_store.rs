@@ -81,8 +81,8 @@ impl CircuitsStore {
 	/// Add circuit.
 	///
 	/// # Arguments
-	/// - `caller_principal` - Principal of the caller
 	/// - `data` - Circuit data
+	/// - `caller_principal` - Principal of the caller
 	///
 	/// # Returns
 	/// - `Circuit` - Added circuit

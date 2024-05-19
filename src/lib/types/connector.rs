@@ -31,6 +31,12 @@ impl Default for Connector {
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
+pub struct PostConnector {
+	pub name: String,
+	pub connector_type: ConnectorType,
+}
+
+#[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum ConnectorType {
 	Http(HttpConnector),
 	Canister(String),
