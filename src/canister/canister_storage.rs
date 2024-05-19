@@ -3,6 +3,7 @@ use lib::types::{
 	circuit::Circuit,
 	circuit_key::CircuitKey,
 	connector::Connector,
+	connector_key::ConnectorKey,
 	trace::Trace,
 	trace_key::TraceKey,
 	user::User,
@@ -39,7 +40,7 @@ thread_local! {
 		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(USERS_MEMORY_ID)))
 	);
 
-	pub static CONNECTORS: StorageRef<String, Connector> = RefCell::new(
+	pub static CONNECTORS: StorageRef<ConnectorKey, Connector> = RefCell::new(
 		StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(CONNECTORS_MEMORY_ID)))
 	);
 }

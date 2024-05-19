@@ -8,6 +8,7 @@ pub mod types {
 	pub mod trace;
 	pub mod user;
 	pub mod connector;
+	pub mod connector_key;
 }
 
 pub mod utils {

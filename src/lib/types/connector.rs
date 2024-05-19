@@ -1,25 +1,31 @@
-use candid::{ CandidType, Deserialize };
+use candid::{ CandidType, Deserialize, Principal };
 use crate::impl_storable_for;
 use super::{ headers::Headers, node::HttpRequestMethod };
 
 impl_storable_for!(Connector);
 #[derive(CandidType, Clone, Deserialize)]
 pub struct Connector {
+	pub id: u32,
+	pub user_id: Principal,
 	pub name: String,
-	pub description: Option<String>,
 	pub connector_type: ConnectorType,
+	pub created_at: u64,
+	pub updated_at: u64,
 }
 
 impl Default for Connector {
 	fn default() -> Self {
 		Self {
+			id: Default::default(),
+			user_id: Principal::anonymous(),
 			name: Default::default(),
-			description: Default::default(),
 			connector_type: ConnectorType::Http(HttpConnector {
 				base_url: Default::default(),
 				headers: Default::default(),
 				authentication: Authentication::None,
 			}),
+			created_at: Default::default(),
+			updated_at: Default::default(),
 		}
 	}
 }

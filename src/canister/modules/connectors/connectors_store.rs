@@ -18,7 +18,7 @@ impl ConnectorsStore {
 
 			connecetors
 				.iter()
-				.filter(|(key, _)| &caller_principal.to_string() == key)
+				.filter(|(key, _)| caller_principal.to_string() == key.owner)
 				.map(|(_, circuit)| circuit.clone())
 				.collect::<Vec<Connector>>()
 		})
