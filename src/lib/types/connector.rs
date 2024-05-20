@@ -23,6 +23,7 @@ impl Default for Connector {
 				base_url: Default::default(),
 				headers: Default::default(),
 				authentication: Authentication::None,
+				test_connection: Default::default(),
 			}),
 			created_at: Default::default(),
 			updated_at: Default::default(),
@@ -47,6 +48,7 @@ pub struct HttpConnector {
 	pub base_url: String,
 	pub headers: Headers,
 	pub authentication: Authentication,
+	pub test_connection: Option<TestConnection>,
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
@@ -62,9 +64,9 @@ pub struct JWTConfig {
 	pub signature_method: SignatureMethod,
 	pub secret: String,
 	pub secret_key: String,
-	pub payload: JWTPayload,
+	pub payload: String,
 	pub location: TokenLocation,
-	pub test_connection: Option<TestConnection>,
+	pub sample_data: String,
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
@@ -81,19 +83,9 @@ pub enum SignatureMethod {
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
-pub struct JWTPayload {
-	pub iss: Option<String>,
-	pub sub: Option<String>,
-	pub aud: Option<String>,
-	pub exp: String,
-	pub others: Vec<(String, String)>, // (key, value)
-}
-
-#[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct TokenConfig {
 	pub token: String,
 	pub location: TokenLocation,
-	pub test_connection: Option<TestConnection>,
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
