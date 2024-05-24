@@ -99,5 +99,4 @@ pub struct TestConnection {
 	pub relative_url: String,
 	pub method: HttpRequestMethod,
 	pub error: Option<(String, String)>, // (error_field, error_value)
-	pub success: Option<(String, String)>, // (success_field, success_value)
 }
