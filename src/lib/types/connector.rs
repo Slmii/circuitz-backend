@@ -71,15 +71,15 @@ pub struct JWTConfig {
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum SignatureMethod {
-	HMACSHA256,
-	HMACSHA384,
-	HMACSHA512,
-	RSASHA256,
-	RSASHA384,
-	RSASHA512,
-	ECDSASHA256,
-	ECDSASHA384,
-	ECDSASHA512,
+	HS256,
+	HS384,
+	HS512,
+	RS256,
+	RS384,
+	RS512,
+	ES256,
+	ES384,
+	ES512,
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, PartialEq, Eq)]
